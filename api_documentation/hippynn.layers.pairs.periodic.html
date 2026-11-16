@@ -91,10 +91,11 @@
 <li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.NPZDatabase"><code class="docutils literal notranslate"><span class="pre">NPZDatabase</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.Predictor"><code class="docutils literal notranslate"><span class="pre">Predictor</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.SetupParams"><code class="docutils literal notranslate"><span class="pre">SetupParams</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.active_directory"><code class="docutils literal notranslate"><span class="pre">active_directory()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.hierarchical_energy_initialization"><code class="docutils literal notranslate"><span class="pre">hierarchical_energy_initialization()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.load_checkpoint"><code class="docutils literal notranslate"><span class="pre">load_checkpoint()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.load_checkpoint_from_active_directory"><code class="docutils literal notranslate"><span class="pre">load_checkpoint_from_active_directory()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.load_checkpoint_from_cwd"><code class="docutils literal notranslate"><span class="pre">load_checkpoint_from_cwd()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.load_model_from_active_directory"><code class="docutils literal notranslate"><span class="pre">load_model_from_active_directory()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.load_model_from_cwd"><code class="docutils literal notranslate"><span class="pre">load_model_from_cwd()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.log_terminal"><code class="docutils literal notranslate"><span class="pre">log_terminal()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.make_ensemble"><code class="docutils literal notranslate"><span class="pre">make_ensemble()</span></code></a></li>
@@ -136,8 +137,11 @@
 <li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.pairs.periodic.StaticImagePeriodicPairIndexer.forward"><code class="docutils literal notranslate"><span class="pre">StaticImagePeriodicPairIndexer.forward()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.pairs.periodic.cayley_inv"><code class="docutils literal notranslate"><span class="pre">cayley_inv()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.pairs.periodic.filter_pairs"><code class="docutils literal notranslate"><span class="pre">filter_pairs()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.pairs.periodic.tracebatch"><code class="docutils literal notranslate"><span class="pre">tracebatch()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.pairs.periodic.union_indices_2d_masks"><code class="docutils literal notranslate"><span class="pre">union_indices_2d_masks()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.pairs.periodic.wrap_systems_torch"><code class="docutils literal notranslate"><span class="pre">wrap_systems_torch()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -287,9 +291,22 @@ registered hooks while the latter silently ignores them.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.periodic.cayley_inv">
+<span class="sig-name descname"><span class="pre">cayley_inv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/periodic.html#cayley_inv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.periodic.cayley_inv" title="Link to this definition"></a></dt>
+<dd><p>Inverse of a batch of 3x3 matrices.</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="hippynn.layers.pairs.periodic.filter_pairs">
 <span class="sig-name descname"><span class="pre">filter_pairs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cutoff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distflat</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">addn_features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/periodic.html#filter_pairs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.periodic.filter_pairs" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.periodic.tracebatch">
+<span class="sig-name descname"><span class="pre">tracebatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/periodic.html#tracebatch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.periodic.tracebatch" title="Link to this definition"></a></dt>
+<dd><p>Trace of  of batch of matrices.
+Defaults to last two dimensions.</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hippynn.layers.pairs.periodic.union_indices_2d_masks">
@@ -306,6 +323,29 @@ of all possible products. It does call nonzero several times which causes
 blocking ops on the GPU, but because they are almost back-to-back
 this is usually not worse than calling nonzero in the first place.</p>
 <p>Performance heuristic note: Provide the arrays in ascending sparsity order.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.periodic.wrap_systems_torch">
+<span class="sig-name descname"><span class="pre">wrap_systems_torch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/periodic.html#wrap_systems_torch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.periodic.wrap_systems_torch" title="Link to this definition"></a></dt>
+<dd><p>Wraps coordinates to within the unit cell.</p>
+<p>Returns Inverse cells of shape (n_systems, 3 [cartesian], 3 [basis])
+Wrapped coords in same shape of coords
+Wrapped offset in shape (n_systems,n_atoms,3 [basis])
+and n_bounds in shape (n_systems,3) in terms of the number of image cells
+to search for each basis vector (radius).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coords</strong> – coordinates of shape (n_systems,n_atoms,3)</p></li>
+<li><p><strong>cell</strong> – cells of shape (n_systems, 3 [basis], 3 [cartesian])</p></li>
+<li><p><strong>cutoff</strong> – cutoff radius to search.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>inv_cells, wrapped_coords, wrapped_offset, n_bounds</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

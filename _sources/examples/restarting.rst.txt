@@ -33,8 +33,8 @@ Loading models and simple training restart
 
 To load a saved model, you can use::
 
-    from hippynn.experiment.serialization import load_model_from_cwd
-    model = load_model_from_cwd()
+    from hippynn.experiment import load_model_from_active_directory
+    model = load_model_from_active_directory()
 
 The returned ``model`` object will have the original model with the best
 parameters loaded. This can then be used with, for example, the :doc:`/examples/predictor`.
@@ -46,14 +46,14 @@ parameters loaded. This can then be used with, for example, the :doc:`/examples/
 
 To restart training, you can use the following::
 
-    from hippynn.experiment.serialization import load_checkpoint
+    from hippynn.experiment import load_checkpoint
     check = load_checkpoint("./experiment_structure.pt", "./best_checkpoint.pt")
     train_model(**check, callbacks=None, batch_callbacks=None)
 
-or to use the default filenames and load from the current directory::
+or to use the default filenames and load from the active directory::
 
-    from hippynn.experiment.serialization import load_checkpoint_from_cwd
-    check = load_checkpoint_from_cwd()
+    from hippynn.experiment import load_checkpoint_from_active_directory
+    check = load_checkpoint_from_active_directory()
     train_model(**check, callbacks=None, batch_callbacks=None)
 
 .. note::
@@ -74,11 +74,11 @@ to a different device. The standard pytorch argument ``map_device`` is a bit tri
 handle in this case, as not all tensors in the checkpoint still belong on the device.
 If this keyword is specified, ``hippynn`` will attempt to automatically move the correct
 tensors to the correct device. To perform cross-device loading, use the ``model_device``
-argument to :func:`~hippynn.experiment.serialization.load_checkpoint_from_cwd`
-or :func:`~hippynn.experiment.serialization.load_checkpoint`::
+argument to :func:`~hippynn.experiment.checkpoints.load_checkpoint_from_active_directory`
+or :func:`~hippynn.experiment.checkpoints.load_checkpoint`::
 
-     from hippynn.experiment.serialization import load_checkpoint_from_cwd
-     check = load_checkpoint_from_cwd(model_device='cuda:0')
+     from hippynn.experiment import load_checkpoint_from_active_directory
+     check = load_checkpoint_from_active_directory(model_device='cuda:0')
      train_model(**check, callbacks=None, batch_callbacks=None)
 
 The string 'auto' can be provided to transfer to the default device.

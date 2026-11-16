@@ -91,10 +91,11 @@
 <li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.NPZDatabase"><code class="docutils literal notranslate"><span class="pre">NPZDatabase</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.Predictor"><code class="docutils literal notranslate"><span class="pre">Predictor</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.SetupParams"><code class="docutils literal notranslate"><span class="pre">SetupParams</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.active_directory"><code class="docutils literal notranslate"><span class="pre">active_directory()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.hierarchical_energy_initialization"><code class="docutils literal notranslate"><span class="pre">hierarchical_energy_initialization()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.load_checkpoint"><code class="docutils literal notranslate"><span class="pre">load_checkpoint()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.load_checkpoint_from_active_directory"><code class="docutils literal notranslate"><span class="pre">load_checkpoint_from_active_directory()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.load_checkpoint_from_cwd"><code class="docutils literal notranslate"><span class="pre">load_checkpoint_from_cwd()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.load_model_from_active_directory"><code class="docutils literal notranslate"><span class="pre">load_model_from_active_directory()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.load_model_from_cwd"><code class="docutils literal notranslate"><span class="pre">load_model_from_cwd()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.log_terminal"><code class="docutils literal notranslate"><span class="pre">log_terminal()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.make_ensemble"><code class="docutils literal notranslate"><span class="pre">make_ensemble()</span></code></a></li>
@@ -132,9 +133,12 @@
 <li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.pairs.dispatch.TorchNeighbors.compute_one"><code class="docutils literal notranslate"><span class="pre">TorchNeighbors.compute_one()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.pairs.dispatch.compute_offset_range"><code class="docutils literal notranslate"><span class="pre">compute_offset_range()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.pairs.dispatch.neighbor_list_kdtree"><code class="docutils literal notranslate"><span class="pre">neighbor_list_kdtree()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.pairs.dispatch.neighbor_list_np"><code class="docutils literal notranslate"><span class="pre">neighbor_list_np()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.pairs.dispatch.neighbor_list_torch"><code class="docutils literal notranslate"><span class="pre">neighbor_list_torch()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.pairs.dispatch.wrap_points_np"><code class="docutils literal notranslate"><span class="pre">wrap_points_np()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.pairs.dispatch.wrap_points_torch"><code class="docutils literal notranslate"><span class="pre">wrap_points_torch()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="hippynn.layers.pairs.filters.html">filters module</a></li>
@@ -262,6 +266,11 @@ registered hooks while the latter silently ignores them.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.dispatch.compute_offset_range">
+<span class="sig-name descname"><span class="pre">compute_offset_range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inv_cell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/dispatch.html#compute_offset_range"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.dispatch.compute_offset_range" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="hippynn.layers.pairs.dispatch.neighbor_list_kdtree">
 <span class="sig-name descname"><span class="pre">neighbor_list_kdtree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cutoff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/dispatch.html#neighbor_list_kdtree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.dispatch.neighbor_list_kdtree" title="Link to this definition"></a></dt>
 <dd><p>Use KD Tree implementation from scipy.spatial to find pairs under periodic boundary conditions 
@@ -274,8 +283,18 @@ with an orthorhombic cell.</p>
 <dd></dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.dispatch.neighbor_list_torch">
+<span class="sig-name descname"><span class="pre">neighbor_list_torch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cutoff</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/dispatch.html#neighbor_list_torch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.dispatch.neighbor_list_torch" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="hippynn.layers.pairs.dispatch.wrap_points_np">
 <span class="sig-name descname"><span class="pre">wrap_points_np</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_cell</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/dispatch.html#wrap_points_np"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.dispatch.wrap_points_np" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.dispatch.wrap_points_torch">
+<span class="sig-name descname"><span class="pre">wrap_points_torch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_cell</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/dispatch.html#wrap_points_torch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.dispatch.wrap_points_torch" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>

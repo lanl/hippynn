@@ -139,7 +139,7 @@
         <span class="n">arr_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span>
         <span class="n">inputs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">targets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-        <span class="n">seed</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Generator</span><span class="p">],</span>
+        <span class="n">seed</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Generator</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span>
         <span class="n">test_size</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">valid_size</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">num_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
@@ -154,7 +154,8 @@
 <span class="sd">        :param arr_dict: dictionary mapping strings to numpy arrays</span>
 <span class="sd">        :param inputs:   list of strings for input db_names</span>
 <span class="sd">        :param targets:  list of strings for output db_namees</span>
-<span class="sd">        :param seed:     int, for random splitting, or existing torch.Generator object</span>
+<span class="sd">        :param seed:     int, for random splitting, an existing torch.Generator object,</span>
+<span class="sd">          or a generator state tensor (as from ``torch.Generator.get_state()``)</span>
 <span class="sd">        :param test_size: fraction of data to use in test split</span>
 <span class="sd">        :param valid_size: fraction of data to use in train split</span>
 <span class="sd">        :param num_workers: passed to pytorch dataloaders</span>
@@ -411,7 +412,7 @@
 <div class="viewcode-block" id="Database.make_explicit_split_bool">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.Database.make_explicit_split_bool">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make_explicit_split_bool</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                                 <span class="n">split_mask</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">]):</span>
+                                 <span class="n">split_mask</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :param split_name: name for split, typically 'train', 'valid', 'test'</span>
@@ -920,7 +921,7 @@
 
 <div class="viewcode-block" id="Database.make_database_cache">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.Database.make_database_cache">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">make_database_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"./hippynn_db_cache.npz"</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">override_kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Database"</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make_database_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"./hippynn_db_cache.npz"</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">override_kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Database</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Cache the database as-is, and re-open it.</span>
 

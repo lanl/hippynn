@@ -195,20 +195,23 @@
 
 
 
-<span class="nd">@torch</span><span class="o">.</span><span class="n">jit</span><span class="o">.</span><span class="n">script</span>
+<div class="viewcode-block" id="tracebatch">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.periodic.html#hippynn.layers.pairs.periodic.tracebatch">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">tracebatch</span><span class="p">(</span><span class="n">mat</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Trace of  of batch of matrices.</span>
 <span class="sd">    Defaults to last two dimensions.</span>
 <span class="sd">    """</span>
-    <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">diagonal</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">dim1</span><span class="o">=-</span><span class="mi">2</span><span class="p">,</span> <span class="n">dim2</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">diagonal</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">dim1</span><span class="o">=-</span><span class="mi">2</span><span class="p">,</span> <span class="n">dim2</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></div>
+
 
 <span class="c1"># For some reason torch.linalg on GPU tends to</span>
 <span class="c1"># spend a lot of time allocating memory, especially</span>
 <span class="c1"># when it is given a large batch of matrices.</span>
 <span class="c1"># So we use the Cayley-Hamilton version of a matrix inverse</span>
 <span class="c1"># Without calling any linalg functions.</span>
-<span class="nd">@torch</span><span class="o">.</span><span class="n">jit</span><span class="o">.</span><span class="n">script</span>
+<div class="viewcode-block" id="cayley_inv">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.periodic.html#hippynn.layers.pairs.periodic.cayley_inv">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">cayley_inv</span><span class="p">(</span><span class="n">A</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Inverse of a batch of 3x3 matrices.</span>
@@ -225,9 +228,11 @@
     <span class="n">Ainvunscale</span> <span class="o">=</span> <span class="n">eyeterm</span> <span class="o">-</span> <span class="n">A</span> <span class="o">*</span> <span class="p">(</span><span class="n">trA</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="o">+</span> <span class="n">Asq</span>
     <span class="n">det</span> <span class="o">=</span> <span class="n">tracebatch</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">bmm</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">Ainvunscale</span><span class="p">))</span> <span class="o">/</span> <span class="mf">3.</span>
 
-    <span class="k">return</span> <span class="n">Ainvunscale</span> <span class="o">/</span> <span class="n">det</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Ainvunscale</span> <span class="o">/</span> <span class="n">det</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span></div>
 
-<span class="nd">@torch</span><span class="o">.</span><span class="n">jit</span><span class="o">.</span><span class="n">script</span>
+
+<div class="viewcode-block" id="wrap_systems_torch">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.periodic.html#hippynn.layers.pairs.periodic.wrap_systems_torch">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">wrap_systems_torch</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">cell</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Wraps coordinates to within the unit cell.</span>
@@ -259,7 +264,8 @@
     <span class="n">inv_lengths</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">inv_cell</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">n_bounds</span> <span class="o">=</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">cutoff</span> <span class="o">*</span> <span class="n">inv_lengths</span> <span class="o">+</span> <span class="n">eps</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">inv_cell</span><span class="p">,</span> <span class="n">wrapped_coords</span><span class="p">,</span> <span class="n">wrapped_offset</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span> <span class="n">n_bounds</span>
+    <span class="k">return</span> <span class="n">inv_cell</span><span class="p">,</span> <span class="n">wrapped_coords</span><span class="p">,</span> <span class="n">wrapped_offset</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span> <span class="n">n_bounds</span></div>
+
 
 
 <div class="viewcode-block" id="filter_pairs">

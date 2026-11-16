@@ -117,6 +117,8 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span><span class="o">,</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">pathlib</span><span class="o">,</span><span class="w"> </span><span class="nn">traceback</span><span class="o">,</span><span class="w"> </span><span class="nn">warnings</span><span class="o">,</span><span class="w"> </span><span class="nn">functools</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">contextlib</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">contextvars</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContextVar</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
@@ -146,12 +148,31 @@
 
 
 
+<span class="k">class</span><span class="w"> </span><span class="nc">_ContextLocalFile</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Writes to `file`, but only from contexts (thread, or task in asyncio) where `file` is active.</span>
+<span class="sd">    """</span>
+
+    <span class="n">active_files</span> <span class="o">=</span> <span class="n">ContextVar</span><span class="p">(</span><span class="s2">"hippynn.log_terminal"</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="p">())</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="n">file</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">arg</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_files</span><span class="o">.</span><span class="n">get</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="o">*</span><span class="n">arg</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">flush</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">arg</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_files</span><span class="o">.</span><span class="n">get</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">flush</span><span class="p">(</span><span class="o">*</span><span class="n">arg</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
 <div class="viewcode-block" id="log_terminal">
 <a class="viewcode-back" href="../../api_documentation/hippynn.tools.html#hippynn.log_terminal">[docs]</a>
 <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">log_terminal</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
-<span class="sd">    :param: file: filename or string</span>
+<span class="sd">    :param: file: filename or string; relative filenames are placed in the ``active_directory``.</span>
 <span class="sd">    :param: args:   piped to ``open(file,*args,**kwargs)`` if file is a string</span>
 <span class="sd">    :param: kwargs: piped to ``open(file,*args,**kwargs)`` if file is a string</span>
 
@@ -160,73 +181,120 @@
 <span class="sd">    The manager yields the file. Writes to the opened file object with</span>
 <span class="sd">    "with log_terminal(...) as &lt;file&gt;" will not automatically</span>
 <span class="sd">    be piped into the terminal.</span>
+
+<span class="sd">    Only output from the current context (thread, or task in asyncio) is logged.</span>
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s2">"write"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">close_on_exit</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">file_context</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">active_directory</span> <span class="o">/</span> <span class="n">file</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">close_on_exit</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="n">teed_stderr</span> <span class="o">=</span> <span class="n">TeedFileOutput</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-    <span class="n">teed_stdout</span> <span class="o">=</span> <span class="n">TeedFileOutput</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
-    <span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">redirect_stderr</span><span class="p">(</span><span class="n">teed_stderr</span><span class="p">):</span>
-        <span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">redirect_stdout</span><span class="p">(</span><span class="n">teed_stdout</span><span class="p">):</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="k">yield</span> <span class="n">file</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">"Uncaught exception, logging interrupted."</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">teed_stderr</span><span class="p">)</span>
-                <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="n">file</span><span class="p">)</span>
-                <span class="k">raise</span>
-            <span class="k">finally</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">close_on_exit</span><span class="p">:</span>
-                    <span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+        <span class="n">file_context</span> <span class="o">=</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">nullcontext</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">file_context</span> <span class="k">as</span> <span class="n">file</span><span class="p">,</span> <span class="n">_ContextLocalFile</span><span class="o">.</span><span class="n">active_files</span><span class="o">.</span><span class="n">set</span><span class="p">((</span><span class="o">*</span><span class="n">_ContextLocalFile</span><span class="o">.</span><span class="n">active_files</span><span class="o">.</span><span class="n">get</span><span class="p">(),</span> <span class="n">file</span><span class="p">)):</span>
+        <span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">redirect_stdout</span><span class="p">(</span><span class="n">TeedFileOutput</span><span class="p">(</span><span class="n">_ContextLocalFile</span><span class="p">(</span><span class="n">file</span><span class="p">),</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)):</span>
+            <span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">redirect_stderr</span><span class="p">(</span><span class="n">TeedFileOutput</span><span class="p">(</span><span class="n">_ContextLocalFile</span><span class="p">(</span><span class="n">file</span><span class="p">),</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">yield</span> <span class="n">file</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">"Uncaught exception, logging interrupted."</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+                    <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="n">file</span><span class="p">)</span>
+                    <span class="k">raise</span></div>
 
 
 
-<div class="viewcode-block" id="active_directory">
-<a class="viewcode-back" href="../../api_documentation/hippynn.tools.html#hippynn.active_directory">[docs]</a>
-<span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">active_directory</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ContextDirectory">
+<a class="viewcode-back" href="../../api_documentation/hippynn.tools.html#hippynn.ContextDirectory">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ContextDirectory</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""</span>
-<span class="sd">    Context manager for temporarily switching the current working directory.</span>
+<span class="sd">    A directory which can be switched for a block of code with ``with directory(dirname):``.</span>
+<span class="sd">    This does not change the working directory, and only applies to the current context</span>
+<span class="sd">    (thread, or task in asyncio).</span>
 
-<span class="sd">    If create is None, always succeed.</span>
-<span class="sd">    If create is True, only succeed if the directory does not exist, and create one.</span>
-<span class="sd">    If create is False, only succeed if the directory does exist, and switch to it.</span>
+<span class="sd">    It can be used as a path (``directory / "file.pt"``, ``os.fspath(directory)``), which evaluates</span>
+<span class="sd">    to the directory at the time of use. By default, this is the current working directory.</span>
+<span class="sd">    Not hashable, because the value changes; use ``directory.resolve()`` for a fixed path.</span>
 
-<span class="sd">    In other words, use create=True if you want to force that it's a new directory.</span>
-<span class="sd">    Use create=False if you want to switch to an existing directory.</span>
-<span class="sd">    Use create=None create a directory if you are okay with either alternative.</span>
-
-<span class="sd">    :param dirname: directory to enter</span>
-<span class="sd">    :param create: (None,True,False)</span>
-
-<span class="sd">    :return: None</span>
-<span class="sd">    :raises: If directory status not compatible with `create` constraints.</span>
+<span class="sd">    :param name: name of the underlying :class:`~contextvars.ContextVar`. Like context variables,</span>
+<span class="sd">      instances should be created at module level.</span>
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="n">create</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Argument 'create' must be one of None, True, or False"</span><span class="p">)</span>
 
-    <span class="n">exists</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">directory</span> <span class="o">=</span> <span class="n">ContextVar</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">create</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">exists</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">FileExistsError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">"Directory '</span><span class="si">{</span><span class="n">dirname</span><span class="si">}</span><span class="s2">' exists already. Pass create=False or create=None to "</span>
-            <span class="s2">"allow switching to an existing directory."</span>
-        <span class="p">)</span>
-    <span class="k">if</span> <span class="n">create</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">exists</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">"Directory '</span><span class="si">{</span><span class="n">dirname</span><span class="si">}</span><span class="s2">' not found. Pass create=True or create=None to allow creation of the directory."</span>
-        <span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">exists</span> <span class="ow">and</span> <span class="n">create</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span>
+<div class="viewcode-block" id="ContextDirectory.resolve">
+<a class="viewcode-back" href="../../api_documentation/hippynn.tools.html#hippynn.ContextDirectory.resolve">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">directory</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="ow">or</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span></div>
 
-    <span class="n">return_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="k">yield</span>
-    <span class="k">finally</span><span class="p">:</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">return_dir</span><span class="p">)</span></div>
 
+    <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dirname</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">]],</span> <span class="n">create</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">chdir</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Context manager for temporarily switching the directory.</span>
+
+<span class="sd">        If create is None, always succeed.</span>
+<span class="sd">        If create is True, only succeed if the directory does not exist, and create one.</span>
+<span class="sd">        If create is False, only succeed if the directory does exist, and switch to it.</span>
+
+<span class="sd">        In other words, use create=True if you want to force that it's a new directory.</span>
+<span class="sd">        Use create=False if you want to switch to an existing directory.</span>
+<span class="sd">        Use create=None create a directory if you are okay with either alternative.</span>
+
+<span class="sd">        :param dirname: directory to enter, relative to the current directory of this object.</span>
+<span class="sd">          If None, the directory is not changed.</span>
+<span class="sd">        :param create: (None,True,False)</span>
+<span class="sd">        :param chdir: Also change the working directory. This affects all relative paths, such as dataset paths.</span>
+
+<span class="sd">        :return: context manager yielding the directory</span>
+<span class="sd">        :raises: If directory status not compatible with `create` constraints.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">dirname</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+            <span class="k">return</span>
+
+        <span class="n">dirname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span> <span class="o">/</span> <span class="n">dirname</span>
+
+        <span class="k">if</span> <span class="n">create</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Argument 'create' must be one of None, True, or False"</span><span class="p">)</span>
+        <span class="n">exists</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">create</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">exists</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">FileExistsError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"Directory '</span><span class="si">{</span><span class="n">dirname</span><span class="si">}</span><span class="s2">' exists already. Pass create=False or create=None to "</span>
+                <span class="s2">"allow switching to an existing directory."</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">create</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">exists</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"Directory '</span><span class="si">{</span><span class="n">dirname</span><span class="si">}</span><span class="s2">' not found. Pass create=True or create=None to allow creation of the directory."</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">exists</span> <span class="ow">and</span> <span class="n">create</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">directory</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">dirname</span><span class="p">),</span> <span class="p">(</span><span class="n">contextlib</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span> <span class="k">if</span> <span class="n">chdir</span> <span class="k">else</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">nullcontext</span><span class="p">()):</span>
+            <span class="k">yield</span> <span class="n">dirname</span>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__fspath__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resolve</span><span class="p">())</span>
+
+    <span class="fm">__str__</span> <span class="o">=</span> <span class="n">__fspath__</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__truediv__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span> <span class="o">/</span> <span class="n">other</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span> <span class="o">==</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> is not hashable; use .resolve() to get a fixed path."</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># Directory where hippynn writes and reads its own files, such as checkpoints, logs, and plots.</span>
+<span class="c1"># Use as a context manager to set a temporary active directory.</span>
+<span class="c1"># under the hood, thread-safe via ContextVars</span>
+<span class="n">active_directory</span> <span class="o">=</span> <span class="n">ContextDirectory</span><span class="p">(</span><span class="s2">"hippynn.active_directory"</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="open_if_needed">
@@ -240,10 +308,10 @@
 <span class="sd">    not closed on exit); otherwise `file` is treated as a filename, opened with `mode`, and closed</span>
 <span class="sd">    on exit.</span>
 
-<span class="sd">    :param file: filename or an already-open file object</span>
+<span class="sd">    :param file: filename (str or path-like) or an already-open file object</span>
 <span class="sd">    :param mode: passed to ``open()`` if `file` is a filename</span>
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">)):</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
             <span class="k">yield</span> <span class="n">fh</span>
     <span class="k">else</span><span class="p">:</span>
@@ -267,7 +335,7 @@
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">filetype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">filetype</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">)):</span>
         <span class="n">suffix</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">file</span><span class="p">)</span><span class="o">.</span><span class="n">suffix</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">"."</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
         <span class="n">suffix</span> <span class="o">=</span> <span class="p">(</span><span class="n">aliases</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">suffix</span><span class="p">,</span> <span class="n">suffix</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">suffix</span> <span class="ow">in</span> <span class="n">filetypes</span><span class="p">:</span>
@@ -319,10 +387,8 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">device_fallback</span><span class="p">():</span>
     <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
         <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">current_device</span><span class="p">())</span>
-    <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">torch</span><span class="p">,</span> <span class="s2">"get_default_device"</span><span class="p">):</span>
-        <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">get_default_device</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">"cpu"</span><span class="p">)</span>
+        <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">get_default_device</span><span class="p">()</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">"Device was not specified. Attempting to default to device:"</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
     <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="n">device</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">device</span></div>
@@ -466,24 +532,8 @@
 
 
 
-<span class="k">try</span><span class="p">:</span>
-    <span class="n">torch</span><span class="o">.</span><span class="n">serialization</span><span class="o">.</span><span class="n">add_safe_globals</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">add_safe_globals</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">"""</span>
-<span class="sd">        Backwards-compatible alias of torch.serialization.add_safe_globals</span>
-<span class="sd">        """</span>
-        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">serialization</span><span class="o">.</span><span class="n">add_safe_globals</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-<span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-    <span class="c1"># Older version of pytorch.</span>
-<div class="viewcode-block" id="add_safe_globals">
-<a class="viewcode-back" href="../../api_documentation/hippynn.tools.html#hippynn.add_safe_globals">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">add_safe_globals</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">"""</span>
-<span class="sd">        Backwards-compatible alias of torch.serialization.add_safe_globals</span>
-<span class="sd">        """</span>
-        <span class="k">pass</span></div>
-
+<span class="c1"># Backwards-compatible alias.</span>
+<span class="n">add_safe_globals</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">serialization</span><span class="o">.</span><span class="n">add_safe_globals</span>
 
 
 <div class="viewcode-block" id="SetStateMixin">

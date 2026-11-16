@@ -111,11 +111,13 @@
 <span></span><span class="sd">"""</span>
 <span class="sd">Node for charge equilibration model.</span>
 <span class="sd">"""</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+
 <span class="kn">from</span><span class="w"> </span><span class="nn">...._deprecations</span><span class="w"> </span><span class="kn">import</span> <span class="n">_DeprecatedNamesMixin</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">....layers</span><span class="w"> </span><span class="kn">import</span> <span class="n">physics</span> <span class="k">as</span> <span class="n">physics_layers</span> 
+<span class="kn">from</span><span class="w"> </span><span class="nn">....layers</span><span class="w"> </span><span class="kn">import</span> <span class="n">physics</span> <span class="k">as</span> <span class="n">physics_layers</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">..base</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiNode</span><span class="p">,</span> <span class="n">AutoModule</span><span class="p">,</span> <span class="n">find_unique_relative</span><span class="p">,</span> <span class="n">find_relatives</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">Node</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..base</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiNode</span><span class="p">,</span> <span class="n">AutoModule</span><span class="p">,</span> <span class="n">find_unique_relative</span><span class="p">,</span> <span class="n">find_relatives</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">Node</span><span class="p">,</span> <span class="n">NodeNotFound</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">...indextypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">IdxType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..networks</span><span class="w"> </span><span class="kn">import</span> <span class="n">Network</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..targets</span><span class="w"> </span><span class="kn">import</span> <span class="n">HChargeNode</span>
@@ -346,9 +348,10 @@
     <span class="nd">@parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">Node</span><span class="p">,</span> <span class="n">Node</span><span class="p">,</span> <span class="n">Node</span><span class="p">,</span> <span class="n">Node</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">warn_if_pbc_detected</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">parents</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">cell_nodes</span> <span class="o">=</span> <span class="n">find_relatives</span><span class="p">(</span><span class="n">parents</span><span class="p">,</span> <span class="n">CellNode</span><span class="p">)</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+            <span class="n">find_relatives</span><span class="p">(</span><span class="n">parents</span><span class="p">,</span> <span class="n">CellNode</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">NodeNotFound</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">"Periodic boundaries were detected in the graph; "</span> <span class="o">+</span>\
                           <span class="s2">"This ChEQ node computes using open boundary conditions only"</span><span class="p">,</span>
                           <span class="n">stacklevel</span><span class="o">=</span><span class="mi">3</span>

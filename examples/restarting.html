@@ -146,8 +146,8 @@ the metrics of the experiment so far. This can be seen by breaking down
 <section id="loading-models-and-simple-training-restart">
 <h2>Loading models and simple training restart<a class="headerlink" href="#loading-models-and-simple-training-restart" title="Link to this heading"></a></h2>
 <p>To load a saved model, you can use:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.experiment.serialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_model_from_cwd</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">load_model_from_cwd</span><span class="p">()</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.experiment</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_model_from_active_directory</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">load_model_from_active_directory</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>The returned <code class="docutils literal notranslate"><span class="pre">model</span></code> object will have the original model with the best
@@ -159,14 +159,14 @@ module. It is possible to construct malicious pickle data which will execute arb
 unpickling. Only load data you trust.</p>
 </div>
 <p>To restart training, you can use the following:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.experiment.serialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_checkpoint</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.experiment</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_checkpoint</span>
 <span class="n">check</span> <span class="o">=</span> <span class="n">load_checkpoint</span><span class="p">(</span><span class="s2">"./experiment_structure.pt"</span><span class="p">,</span> <span class="s2">"./best_checkpoint.pt"</span><span class="p">)</span>
 <span class="n">train_model</span><span class="p">(</span><span class="o">**</span><span class="n">check</span><span class="p">,</span> <span class="n">callbacks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">batch_callbacks</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>or to use the default filenames and load from the current directory:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.experiment.serialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_checkpoint_from_cwd</span>
-<span class="n">check</span> <span class="o">=</span> <span class="n">load_checkpoint_from_cwd</span><span class="p">()</span>
+<p>or to use the default filenames and load from the active directory:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.experiment</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_checkpoint_from_active_directory</span>
+<span class="n">check</span> <span class="o">=</span> <span class="n">load_checkpoint_from_active_directory</span><span class="p">()</span>
 <span class="n">train_model</span><span class="p">(</span><span class="o">**</span><span class="n">check</span><span class="p">,</span> <span class="n">callbacks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">batch_callbacks</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -188,10 +188,10 @@ to a different device. The standard pytorch argument <code class="docutils liter
 handle in this case, as not all tensors in the checkpoint still belong on the device.
 If this keyword is specified, <code class="docutils literal notranslate"><span class="pre">hippynn</span></code> will attempt to automatically move the correct
 tensors to the correct device. To perform cross-device loading, use the <code class="docutils literal notranslate"><span class="pre">model_device</span></code>
-argument to <code class="xref py py-func docutils literal notranslate"><span class="pre">load_checkpoint_from_cwd()</span></code>
-or <code class="xref py py-func docutils literal notranslate"><span class="pre">load_checkpoint()</span></code>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.experiment.serialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_checkpoint_from_cwd</span>
-<span class="n">check</span> <span class="o">=</span> <span class="n">load_checkpoint_from_cwd</span><span class="p">(</span><span class="n">model_device</span><span class="o">=</span><span class="s1">'cuda:0'</span><span class="p">)</span>
+argument to <a class="reference internal" href="../api_documentation/hippynn.experiment.checkpoints.html#hippynn.experiment.checkpoints.load_checkpoint_from_active_directory" title="hippynn.experiment.checkpoints.load_checkpoint_from_active_directory"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_checkpoint_from_active_directory()</span></code></a>
+or <a class="reference internal" href="../api_documentation/hippynn.experiment.checkpoints.html#hippynn.experiment.checkpoints.load_checkpoint" title="hippynn.experiment.checkpoints.load_checkpoint"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_checkpoint()</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.experiment</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_checkpoint_from_active_directory</span>
+<span class="n">check</span> <span class="o">=</span> <span class="n">load_checkpoint_from_active_directory</span><span class="p">(</span><span class="n">model_device</span><span class="o">=</span><span class="s1">'cuda:0'</span><span class="p">)</span>
 <span class="n">train_model</span><span class="p">(</span><span class="o">**</span><span class="n">check</span><span class="p">,</span> <span class="n">callbacks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">batch_callbacks</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 </pre></div>
 </div>

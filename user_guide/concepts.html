@@ -58,6 +58,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#nodes">Nodes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#graphs">Graphs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#experiment">Experiment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#active-directory">Active directory</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="databases.html">Databases</a></li>
@@ -160,6 +161,21 @@ and the LAMMPS interface objects all use GraphModules.</p>
 <section id="experiment">
 <h2>Experiment<a class="headerlink" href="#experiment" title="Link to this heading"></a></h2>
 <p>An experiment is a training run.</p>
+</section>
+<section id="active-directory">
+<h2>Active directory<a class="headerlink" href="#active-directory" title="Link to this heading"></a></h2>
+<p>hippynn writes its own files (checkpoints, metrics, plots, and <code class="docutils literal notranslate"><span class="pre">log_terminal</span></code> files)
+into the active directory, which is the current working directory unless changed with <code class="docutils literal notranslate"><span class="pre">active_directory</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">hippynn</span><span class="o">.</span><span class="n">active_directory</span><span class="p">(</span><span class="s2">"my_experiment"</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">hippynn</span><span class="o">.</span><span class="n">log_terminal</span><span class="p">(</span><span class="s2">"training_log.txt"</span><span class="p">,</span> <span class="s2">"wt"</span><span class="p">):</span>
+        <span class="n">database</span> <span class="o">=</span> <span class="n">hippynn</span><span class="o">.</span><span class="n">databases</span><span class="o">.</span><span class="n">DirectoryDatabase</span><span class="p">(</span><span class="n">directory</span><span class="o">=</span><span class="s2">"datasets/qm7"</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+        <span class="n">hippynn</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">setup_and_train</span><span class="p">(</span><span class="n">training_modules</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">setup_params</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The working directory is not changed, so <code class="docutils literal notranslate"><span class="pre">datasets/qm7</span></code> is found relative to where the script was run,
+while outputs go into <code class="docutils literal notranslate"><span class="pre">my_experiment/</span></code>. Your own files can be placed there with
+<code class="docutils literal notranslate"><span class="pre">open(hippynn.active_directory</span> <span class="pre">/</span> <span class="pre">&quot;x.txt&quot;)</span></code>, or pass <code class="docutils literal notranslate"><span class="pre">chdir=True</span></code> to also change the working directory.
+The active directory is local to the current thread.</p>
 </section>
 </section>
 
