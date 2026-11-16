@@ -61,7 +61,7 @@ class SetupParams:
     stopping_key: Optional[str] = None
     optimizer: Union[torch.optim.Optimizer, Callable] = torch.optim.Adam
     learning_rate: Optional[float] = None
-    scheduler: Union[torch.optim.lr_scheduler._LRScheduler, Callable] = None
+    scheduler: Union[torch.optim.lr_scheduler.LRScheduler, Callable] = None
     batch_size: Optional[int] = None
     eval_batch_size: Optional[int] = None
     max_epochs: Optional[int] = None
@@ -108,7 +108,8 @@ def setup_and_train(
     setup_params: SetupParams,
     store_all_better=False,
     store_best=True,
-    store_every=0
+    store_every=0,
+    directory=None,
 ):
     """
     :param: training_modules: see :func:`setup_training`
@@ -117,6 +118,7 @@ def setup_and_train(
     :param: store_all_better: Save the state dict for each model doing better than a previous one
     :param: store_best: Save a checkpoint for the best model
     :param: store_every: Save a checkpoint for every certain epochs
+    :param: directory: directory to save files in, see :data:`~hippynn.tools.active_directory`
     :return: See :func:`train_model`
 
     Shortcut for setup_training followed by train_model.
@@ -125,7 +127,7 @@ def setup_and_train(
         The training loop will capture KeyboardInterrupt exceptions to abort the experiment early.
         If you would like to gracefully kill training programmatically, see :func:`train_model` with callbacks argument.
     .. Note::
-        Saves files in the current running directory; recommend you switch
+        Saves files in the active directory; recommend you switch
         to a fresh directory with a descriptive name for your experiment.
 
     """
@@ -136,17 +138,18 @@ def setup_and_train(
     )
 
     # Actually do the training
-    return train_model(
-        training_modules=training_modules,
-        database=database,
-        controller=controller,
-        metric_tracker=metric_tracker,
-        callbacks=None,
-        batch_callbacks=None,
-        store_all_better=store_all_better,
-        store_best=store_best,
-        store_every=store_every
-    )
+    with tools.active_directory(directory):
+        return train_model(
+            training_modules=training_modules,
+            database=database,
+            controller=controller,
+            metric_tracker=metric_tracker,
+            callbacks=None,
+            batch_callbacks=None,
+            store_all_better=store_all_better,
+            store_best=store_best,
+            store_every=store_every,
+        )
 
 
 def setup_training(
@@ -267,7 +270,6 @@ def train_model(
         have to manage that manually (possibly with a callback itself).
 
     """
-
     model, loss, evaluator = training_modules
 
     print("Beginning training.")
@@ -312,7 +314,7 @@ def train_model(
         print("Finishing up...")
     print("Training phase ended.")
 
-    torch.save(metric_tracker, "training_metrics.pt")
+    torch.save(metric_tracker, tools.active_directory / "training_metrics.pt")
 
     best_model = metric_tracker.best_model
     if best_model:
@@ -332,7 +334,7 @@ def train_model(
     )
 
     if store_metrics:
-        with open("training_metrics.pkl", "wb") as pfile:
+        with open(tools.active_directory / "training_metrics.pkl", "wb") as pfile:
             pickle.dump(metric_tracker, pfile)
     print("Training complete.")
     return metric_tracker
@@ -537,29 +539,29 @@ def training_loop(
             if store_all_better:
                 # Save a copy of every network doing better
                 # Note: epoch has already been incremented, so decrement in saving file.
-                with open(f"better_model_epoch_{epoch}.pt", "wb") as pfile:
+                with open(tools.active_directory / f"better_model_epoch_{epoch}.pt", "wb") as pfile:
                     torch.save(best_model, pfile)
 
             if store_best:
                 # Overwrite the "best model so far"
-                with open("best_model.pt", "wb") as pfile:
+                with open(tools.active_directory / "best_model.pt", "wb") as pfile:
                     torch.save(best_model, pfile)
 
                 state = checkpoints.create_state(model, controller, metric_tracker)
 
                 # Write the checkpoint
-                with open("best_checkpoint.pt", "wb") as pfile:
+                with open(tools.active_directory / "best_checkpoint.pt", "wb") as pfile:
                     torch.save(state, pfile)
             
         if store_every and epoch != 0 and (epoch % store_every) == 0:
             # Save a copy every "store_every" epoch
-            with open(f"model_epoch_{epoch}.pt", "wb") as pfile:
+            with open(tools.active_directory / f"model_epoch_{epoch}.pt", "wb") as pfile:
                 torch.save(model.state_dict(), pfile)
             
             state = checkpoints.create_state(model, controller, metric_tracker)
 
             # Write the checkpoint
-            with open(f"checkpoint_epoch_{epoch}.pt", "wb") as pfile:
+            with open(tools.active_directory / f"checkpoint_epoch_{epoch}.pt", "wb") as pfile:
                 torch.save(state, pfile)
 
         epoch += 1

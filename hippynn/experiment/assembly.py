@@ -45,8 +45,8 @@ def generate_database_info(inputs, targets, allow_unfound=False):
 
     # Else, we need to raise an error.
 
-    missing_inputs = [i for i, idb in zip(inputs, db_info["inputs"]) if idb is None]
-    missing_targets = [i for i, idb in zip(targets, db_info["targets"]) if idb is None]
+    missing_inputs = [i for i, idb in zip(inputs, db_info["inputs"], strict=True) if idb is None]
+    missing_targets = [i for i, idb in zip(targets, db_info["targets"], strict=True) if idb is None]
 
     msg = ""
     if missing_inputs:

@@ -1,6 +1,7 @@
 """
 triton implementation of envsum custom kernels for GPU.
 """
+
 import warnings
 import torch
 import triton
@@ -30,12 +31,15 @@ if torch.cuda.is_available():
 
 def config_pruner(configs, nargs, **kwargs):
     """
-    Trims the unnecessary config options based on the sens. and feat. sizes
+    Trims the unnecessary config options based on the sens. and feat. sizes.
+
+    Returns a list rather than a generator: newer triton versions call ``len()`` on the pruned configs.
     """
     p2_sens_size = triton.next_power_of_2(nargs["sens_size"])
     p2_feat_size = triton.next_power_of_2(nargs["feat_size"])
 
     used = set()
+    pruned = []
     for config in configs:
 
         # Don't use block sizes bigger than p2_sens_size or p2_feat_size; they will give the same result
@@ -48,14 +52,18 @@ def config_pruner(configs, nargs, **kwargs):
 
         used.add((sense_block_size, feat_block_size, config.num_stages, config.num_warps))
 
-        yield triton.Config(
-            {
-                "SENS_BLOCK_SIZE": sense_block_size,
-                "FEAT_BLOCK_SIZE": feat_block_size,
-            },
-            num_stages=config.num_stages,
-            num_warps=config.num_warps,
+        pruned.append(
+            triton.Config(
+                {
+                    "SENS_BLOCK_SIZE": sense_block_size,
+                    "FEAT_BLOCK_SIZE": feat_block_size,
+                },
+                num_stages=config.num_stages,
+                num_warps=config.num_warps,
+            )
         )
+
+    return pruned
 
 
 def get_autotune_config():

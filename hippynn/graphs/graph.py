@@ -157,7 +157,7 @@ class GraphModule(torch.nn.Module):
         # Add gradient computation if needed (e.g. for force computation)
         computed = {
             node: value.requires_grad_(value.requires_grad or node.requires_grad)
-            for node, value in zip(self.input_nodes, input_values)
+            for node, value in zip(self.input_nodes, input_values, strict=True)
         }
 
         for this_node in self.forward_output_list:
@@ -179,7 +179,7 @@ class _DebugGraphModule(GraphModule):
         try:
             computed = {
                 node: value.requires_grad_(value.requires_grad or node.requires_grad)
-                for node, value in zip(self.input_nodes, input_values)
+                for node, value in zip(self.input_nodes, input_values, strict=True)
             }
         except Exception as ee:
             for n, v in zip(self.input_nodes, input_values):

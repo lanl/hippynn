@@ -164,12 +164,6 @@ old_kernels = MessagePassingKernels(
     wrap=False,  # Important distinction!
 )
 
-old_kernels_jit = MessagePassingKernels(
-    "_legacy_jit",
-    _envsum_legacy, _sensesum_legacy, _featsum_legacy,
-    compiler=torch.jit.script,
-)
-
 old_kernels_compile = MessagePassingKernels(
     "_legacy_compile",
     _envsum_legacy, _sensesum_legacy, _featsum_legacy,
@@ -187,14 +181,6 @@ pytorch_kernels_raw = MessagePassingKernels(
 pytorch_kernels_wrapped = MessagePassingKernels(
     "_pytorch_raw_wrapped",
     envsum, sensesum, featsum,
-)
-
-pytorch_kernels_jit = MessagePassingKernels(
-    "_pytorch_jit",
-    envsum,
-    sensesum,
-    featsum,
-    compiler=torch.jit.script,
 )
 
 pytorch_kernels_compile = MessagePassingKernels(

@@ -1,11 +1,13 @@
 """
 Node for charge equilibration model.
 """
+import warnings
+
 from ...._deprecations import _DeprecatedNamesMixin
 
-from ....layers import physics as physics_layers 
+from ....layers import physics as physics_layers
 
-from ..base import MultiNode, AutoModule, find_unique_relative, find_relatives, ExpandParents, Node
+from ..base import MultiNode, AutoModule, find_unique_relative, find_relatives, ExpandParents, Node, NodeNotFound
 from ...indextypes import IdxType
 from ..networks import Network
 from ..targets import HChargeNode
@@ -199,9 +201,10 @@ class ChEQNode(ExpandParents, AutoModule, MultiNode):
     @parent_expander.match(Node, Node, Node, Node)
     def warn_if_pbc_detected(self, *parents, **kwargs):
         try:
-            cell_nodes = find_relatives(parents, CellNode)
-        except:
-            import warnings
+            find_relatives(parents, CellNode)
+        except NodeNotFound:
+            pass
+        else:
             warnings.warn("Periodic boundaries were detected in the graph; " +\
                           "This ChEQ node computes using open boundary conditions only",
                           stacklevel=3

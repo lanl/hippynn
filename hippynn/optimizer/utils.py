@@ -14,7 +14,7 @@ def debatch_numbers(
     # with the same number tensor, like trajectory generated in an optimization task
     n = []
     masks = numbers != padding_number
-    for z, m in zip(numbers, masks):
+    for z, m in zip(numbers, masks, strict=True):
         n.append(z[m])
 
     return (n, masks) if return_mask else n
@@ -23,11 +23,7 @@ def debatch_numbers(
 def debatch_coords(coords: torch.Tensor, masks: torch.Tensor) -> List[torch.Tensor]:
     # There is no way to distinguish which row is a padding in a given coordinates tensor
     # so this function must take masks as input, debatch to a list of tensors in different shape
-    assert len(coords) == len(masks)
-    c = []
-    for r, m in zip(coords, masks):
-        c.append(r[m])
-    return c
+    return [r[m] for r, m in zip(coords, masks, strict=True)]
 
 
 def debatch(

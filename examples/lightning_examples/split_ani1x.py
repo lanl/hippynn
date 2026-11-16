@@ -163,7 +163,7 @@ def main(args):
         anidata_location=args.anidata_location,
         use_ccx_subset=args.use_ccx_subset,
     )
-    with hippynn.tools.active_directory("./data_ani1x_split"):
+    with hippynn.tools.active_directory("./data_ani1x_split", chdir=True):  # cache files and restarters use bare filenames
         make_database_splits(database, args.ranks, seed=args.seed, compress=args.compress)
 
     

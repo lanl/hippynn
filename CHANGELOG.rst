@@ -1,6 +1,9 @@
 Breaking changes:
 -----------------
 
+- The minimum python version has been increased to 3.14, and the minimum pytorch version to 2.15.
+- ``torch.jit.script`` is no longer used, as it is unsupported in python 3.14. The hidden
+  ``_legacy_jit`` and ``_pytorch_jit`` custom kernel implementations have been removed.
 - ``calculate_min_dists`` signature changed: ``dist_hard_max`` is now the second
   positional argument, and ``species_name``/``positions_name`` are now optional
   keyword arguments that are auto-detected if omitted. ``cell_name`` now also
@@ -29,9 +32,20 @@ Breaking changes:
   accepted but does not emit a deprecation warning.
 - ``ValueNode`` moved from ``nodes/base/base.py`` to its own
   ``nodes/base/value.py``. Import it from ``hippynn.graphs.nodes.base`` as before.
+- ``active_directory`` no longer changes the working directory, unless ``chdir=True`` is passed.
+  Instead, it sets the directory where hippynn writes and reads its own files (checkpoints, logs, plots).
+  Relative dataset paths are therefore no longer affected by ``active_directory`` (#202).
+- ``log_terminal`` only logs output from the current context, not from other threads.
+- ``load_model_from_cwd`` and ``load_checkpoint_from_cwd`` are renamed to ``load_model_from_active_directory``
+  and ``load_checkpoint_from_active_directory``. The old names still work with a deprecation warning.
 
 New Features:
 -------------
+
+- ``active_directory`` can be used as a path, e.g. ``active_directory / "file.pt"``.
+- ``setup_and_train``, ``load_checkpoint``, and ``load_saved_tensors`` take a ``directory`` argument.
+- ``ContextDirectory`` in ``hippynn.tools`` provides context-local directories like ``active_directory``.
+- ``open_if_needed`` and ``infer_filetype`` accept ``os.PathLike`` filenames.
 
 - Added ``hippynn.databases.utils`` with tools to load databases from multiple
   formats (``load_database``), auto-detect relevant keys (``auto_detect_key``:
@@ -87,6 +101,8 @@ Improvements:
 
 Bug Fixes:
 ----------
+- ``LocalChargeEnergy`` used its linear layers for the quadratic term; it now uses ``layers_quad``.
+- ``ChEQNode`` warned about periodic boundaries when none were present, and not when they were.
 - Fixed dtype bug in ``OneHotSpecies`` species indexing.
 - Fixed ``Database`` split-mask comparison (tensor cast, ``.any()`` instead of
   ``.all()``) and a ``torch.sum`` reduction bug when trimming outliers on

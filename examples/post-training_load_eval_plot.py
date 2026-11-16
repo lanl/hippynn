@@ -26,7 +26,7 @@ if not os.path.exists(model_dir):
     raise ValueError(f"Please run the example script 'QM7_example.py' first to train the model used in this example.")
 
 # RELOAD CHECKPOINT
-with active_directory(model_dir):
+with active_directory(model_dir, chdir=True):  # restart_db=True: stored dataset path is relative to the model dir
     check = load_checkpoint_from_cwd(model_device='cpu', restart_db=True) 
     # alternatively, one can use 'restart_db=False' and manually load a different database with the same db_name for each input variable
 

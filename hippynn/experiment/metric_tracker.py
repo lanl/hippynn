@@ -158,7 +158,7 @@ def table_evaluation_print_better(evaluation_dict, better_dict, metric_names, n_
 
     _print(header)
     _print("-" * len(header))
-    for n, valsbet in zip(metric_names, transposed_values_better):
+    for n, valsbet in zip(metric_names, transposed_values_better, strict=True):
         rowoutput = [k for bv in valsbet for k in bv]
         _print(rowstring.format(n, *rowoutput))
 
@@ -185,6 +185,6 @@ def table_evaluation_print(evaluation_dict, metric_names, n_columns, _print=prin
 
     _print(header)
     _print("-" * len(header))
-    for n, vals in zip(metric_names, transposed_values):
+    for n, vals in zip(metric_names, transposed_values, strict=True):
         _print(rowstring.format(n, *vals))
     _print("-" * len(header))

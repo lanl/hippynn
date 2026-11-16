@@ -79,7 +79,6 @@ class StaticImagePeriodicPairIndexer(_PairIndexer):
         return distflat2, pair_first, pair_second, paircoord, cell_offsets, cp_offset
 
 
-@torch.jit.script
 def tracebatch(mat):
     """
     Trace of  of batch of matrices.
@@ -92,7 +91,6 @@ def tracebatch(mat):
 # when it is given a large batch of matrices.
 # So we use the Cayley-Hamilton version of a matrix inverse
 # Without calling any linalg functions.
-@torch.jit.script
 def cayley_inv(A):
     """
     Inverse of a batch of 3x3 matrices.
@@ -111,7 +109,6 @@ def cayley_inv(A):
 
     return Ainvunscale / det.unsqueeze(-1).unsqueeze(-1)
 
-@torch.jit.script
 def wrap_systems_torch(coords, cell, cutoff: float):
     """
     Wraps coordinates to within the unit cell.

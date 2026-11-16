@@ -6,8 +6,6 @@ Includes tools for loading and exporting databases in EXTXYZ format, and for
 auto-detecting standard database key names (e.g. species, coordinates, energy,
 forces, cell) from a dictionary of arrays.
 """
-from __future__ import annotations
-
 import os
 import warnings
 from pathlib import Path

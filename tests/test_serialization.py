@@ -545,11 +545,11 @@ def test_multioutput_roundtrip(written_energy_graph, energy_graph, example_box):
 @skip_if_no_models
 def test_load_old():
     from hippynn.tools import active_directory
-    from hippynn.experiment import load_checkpoint_from_cwd
+    from hippynn.experiment import load_checkpoint_from_active_directory
 
     location = "./quad0_b512_int1_p5_GPU0_seed363144"
     with active_directory(MODEL_DIR / location, create=False):
-        check = load_checkpoint_from_cwd(map_location="cpu")
+        check = load_checkpoint_from_active_directory(map_location="cpu")
 
     return
 
@@ -561,13 +561,13 @@ def test_load_old():
 @skip_if_no_models
 def test_run_old(example_box):
     from hippynn.tools import active_directory
-    from hippynn.experiment import load_checkpoint_from_cwd
+    from hippynn.experiment import load_checkpoint_from_active_directory
     from hippynn.graphs import Predictor
 
     location = "./quad0_b512_int1_p5_GPU0_seed363144"
 
     with active_directory(MODEL_DIR / location, create=False):
-        check = load_checkpoint_from_cwd(map_location="cpu")
+        check = load_checkpoint_from_active_directory(map_location="cpu")
 
     model = check["training_modules"].model
     predictor = Predictor.from_graph(model)
@@ -611,13 +611,13 @@ def test_validate_old():
     torch.set_printoptions(precision=24)
     
     from hippynn.tools import active_directory
-    from hippynn.experiment import load_checkpoint_from_cwd
+    from hippynn.experiment import load_checkpoint_from_active_directory
     from hippynn.graphs import Predictor
 
     location = "./quad0_b512_int1_p5_GPU0_seed363144"
 
     with active_directory(MODEL_DIR / location, create=False):
-        check = load_checkpoint_from_cwd(map_location="cpu")
+        check = load_checkpoint_from_active_directory(map_location="cpu")
 
     model = check["training_modules"].model
     predictor = Predictor.from_graph(model).to(floatX)

@@ -12,7 +12,7 @@ from hippynn.graphs import physics, inputs
 from hippynn.graphs.gops import swap_pairfinders
 from hippynn.graphs import Predictor
 from hippynn.graphs.nodes.pairs import KDTreePairsMemory
-from hippynn.experiment import load_checkpoint_from_cwd
+from hippynn.experiment import load_checkpoint_from_active_directory
 from hippynn.tools import active_directory
 from hippynn.molecular_dynamics.md import (
     Variable,
@@ -66,7 +66,7 @@ def generate_ase_results(hippynn_model_location, n_steps=3):
     MaxwellBoltzmannDistribution(atoms, temperature_K=300.0, rng=rng)
 
     with active_directory(hippynn_model_location, create=False):
-        check = load_checkpoint_from_cwd(map_location="cpu")
+        check = load_checkpoint_from_active_directory(map_location="cpu")
 
     model = check["training_modules"].model
 
@@ -265,7 +265,7 @@ def test_md_verlet():
 
     # Load and prepare model
     with active_directory(MODEL_DIR / ANI_MODEL, create=False):
-        check = load_checkpoint_from_cwd(map_location="cpu")
+        check = load_checkpoint_from_active_directory(map_location="cpu")
 
     model = check["training_modules"].model
 

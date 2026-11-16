@@ -54,7 +54,7 @@ def cartesian_irreducible_mapping(ind_order):
     ind_comb = torch.stack(
         (torch.arange(len(out_order)), out_order),
     )
-    xform = torch.sparse_coo_tensor(ind_comb, torch.ones(len(out_order)), dtype=torch.int64).to_dense()
+    xform = torch.sparse_coo_tensor(ind_comb, torch.ones(len(out_order)), dtype=torch.int64, check_invariants=True).to_dense()
     # This maps symmetric space to d^order space
     # shape (d^o, t(o)) where t(o) is the triangular number.
 
@@ -121,7 +121,7 @@ def cartesian_irreducible_mapping(ind_order):
     ind, vals = zip(*list(sym_traceless_coo.items()))
     ind = torch.as_tensor(ind).T
     vals = torch.as_tensor(vals)
-    xform2 = torch.sparse_coo_tensor(ind, vals, size=(xform.shape[1], 2 * ind_order + 1))
+    xform2 = torch.sparse_coo_tensor(ind, vals, size=(xform.shape[1], 2 * ind_order + 1), check_invariants=True)
 
     # The full map is simply the map (cartesian index, symmetric) @ (symmetric, sym. traceless)
     full_xform = xform @ xform2.to_dense()

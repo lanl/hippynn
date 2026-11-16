@@ -121,7 +121,7 @@ def get_graphs(models: Union[List[Union[str, GraphModule, Node]], str], weights_
 
     Models can be a list with entries that are one of the following:
 
-    - str: directory to use with :func:`~hippynn.experiment.checkpoints.load_model_from_cwd`
+    - str: directory to use with :func:`~hippynn.experiment.checkpoints.load_model_from_active_directory`
     - GraphModule: already built model
     - node: an output target, which will be converted to a GraphModule with automatically defined inputs.
 
@@ -145,14 +145,14 @@ def get_graphs(models: Union[List[Union[str, GraphModule, Node]], str], weights_
     device = None
     for model in models:
         if isinstance(model, str):
-            from ..experiment.checkpoints import load_model_from_cwd
+            from ..experiment.checkpoints import load_model_from_active_directory
 
             # Get graph from disk
             if device is None:
                 device = device_fallback()
             with active_directory(model, create=False):
                 try:
-                    model = load_model_from_cwd(map_location=device, weights_only=weights_only)
+                    model = load_model_from_active_directory(map_location=device, weights_only=weights_only)
                 except FileNotFoundError:
                     import warnings
 
@@ -334,7 +334,7 @@ def construct_outputs(output_classes: Dict[str, List[Node]], prefix: str) -> Dic
 
             reduced_ensemble_node = EnsembleTarget(name=name, parents=reduced_parents)
 
-            for db_child, reduced_child in zip(ensemble_node.children, reduced_ensemble_node.children):
+            for db_child, reduced_child in zip(ensemble_node.children, reduced_ensemble_node.children, strict=True):
                 assign_index_aliases(db_child, reduced_child)
 
     return ensemble_outputs

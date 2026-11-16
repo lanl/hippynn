@@ -58,10 +58,10 @@ class Evaluator:
             batch_targets = batch[-self.n_targets :]
             batch_predictions = self.model(*batch_inputs)
             # Put predictions and targets on CPU
-            for storage, value in zip(prediction_batch_vals, batch_predictions):
+            for storage, value in zip(prediction_batch_vals, batch_predictions, strict=True):
                 storage.append(value.detach().cpu())
 
-            for storage, value in zip(target_batch_vals, batch_targets):
+            for storage, value in zip(target_batch_vals, batch_targets, strict=True):
                 storage.append(value.detach().cpu())
             del batch_predictions #  To allow freeing memory.
 
@@ -73,7 +73,7 @@ class Evaluator:
         # Note: The `mean` here accounts for device-length vectors returned by scalars computed by
         # a DataParallel module.
         all_losses = [x.mean().item() for x in self.loss(*prediction_all_vals, *target_all_vals)]
-        loss_dict = {name: value for name, value in zip(self.loss_names, all_losses)}
+        loss_dict = {name: value for name, value in zip(self.loss_names, all_losses, strict=True)}
 
         if self.plot_maker:
             self.plot_maker.plot_phase(

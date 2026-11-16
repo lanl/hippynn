@@ -181,7 +181,7 @@ class Hipnn(torch.nn.Module):
             warnings.warn(f"Network initialized with unused {kwargs=}")
 
         # Finally, build the network!
-        for in_size, out_size, middle_size in zip(self.feature_sizes[:-1], self.feature_sizes[1:], self.nf_middle):
+        for in_size, out_size, middle_size in zip(self.feature_sizes[:-1], self.feature_sizes[1:], self.nf_middle, strict=True):
             this_block = torch.nn.ModuleList()
 
             # Add interaction layer

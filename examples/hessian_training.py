@@ -164,7 +164,7 @@ if __name__ == "__main__":
         controller=controller,
     )
 
-    with hippynn.tools.active_directory(active_directory):
+    with hippynn.tools.active_directory(active_directory, chdir=True):  # user code below uses cwd-relative paths
         with hippynn.tools.log_terminal("training_log.txt", 'wt'):
             print("Data Loaded and Network set up! Just need to train... ")
             from hippynn.experiment import setup_and_train

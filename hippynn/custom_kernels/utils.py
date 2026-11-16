@@ -10,7 +10,6 @@ import collections
 from typing import List
 
 
-@torch.jit.script
 def get_id_and_starts(key):
     n_items = key.shape[0]
     key_diff = key[:-1] - key[1:]
@@ -22,7 +21,6 @@ def get_id_and_starts(key):
     return key_ids, key_start
 
 
-@torch.jit.script
 def resort_pairs(key, others: List[torch.Tensor]):
     keysort, argsort = torch.sort(key)
     others = [o[argsort] for o in others]

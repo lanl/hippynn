@@ -34,7 +34,7 @@ class EnsembleTarget(ExpandParents, AutoModule, MultiNode):
         self.input_names = [f"input_{i}" for i in range(len(parents))]
 
         super().__init__(name, parents, module=module)
-        for c, out_name in zip(self.children, self.output_names):
+        for c, out_name in zip(self.children, self.output_names, strict=True):
             c.db_name = f'{db_name}_{out_name}'
 
 

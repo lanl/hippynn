@@ -66,7 +66,6 @@ def neighbor_list_np(cutoff, coords, cell):
     return pair_first, pair_second, pair_image
 
 
-@torch.jit.script
 def wrap_points_torch(coords, cell, inv_cell):
     # cell is (basis,cartesian)
     # inv is (cartesian,basis)
@@ -78,7 +77,6 @@ def wrap_points_torch(coords, cell, inv_cell):
     return wrapped_coords, wrapped_offset.to(torch.int64)
 
 
-@torch.jit.script
 def compute_offset_range(inv_cell, cutoff: float):
     dev = inv_cell.device
     eps = 1e-5
@@ -94,7 +92,6 @@ def compute_offset_range(inv_cell, cutoff: float):
     return offset_range
 
 
-@torch.jit.script
 def neighbor_list_torch(cutoff: float, coords, cell):
     # cell is (basis,cartesian)
     # inv is (cartesian,basis)
@@ -245,7 +242,7 @@ class _DispatchNeighbors(torch.nn.Module):
             sys_inv_atoms = inv_real_atoms.reshape(n_systems, n_atoms_max).unbind(0)
             nlist_data = []
 
-            for (r, c, nb, sia) in zip(coord_list, cell_list, nb_list, sys_inv_atoms):
+            for (r, c, nb, sia) in zip(coord_list, cell_list, nb_list, sys_inv_atoms, strict=True):
                 # r: positions
                 # c: cell
                 # nb: nonblank
@@ -266,6 +263,7 @@ class _DispatchNeighbors(torch.nn.Module):
                 nlist_data.append((pf, ps, of))
 
             # transpose lists into tensors for whole batch
+            # TODO: this try/except could be cleaned up with an explicit check for the no-pairs case.
             try:
                 pair_first, pair_second, offsets = zip(*nlist_data)
                 pair_first = torch.cat(pair_first).to(dev)

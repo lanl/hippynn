@@ -36,6 +36,23 @@ def example_all_target_nodes(neural_network_node, bond_parameters):
     return all_targets
 
 
+def test_local_charge_energy_uses_quadratic_layers():
+    from hippynn.layers.targets import LocalChargeEnergy
+
+    torch.manual_seed(0)
+    module = LocalChargeEnergy(feature_sizes=(3, 4))
+    features = [torch.randn(5, 3), torch.randn(5, 4)]
+    charges = torch.randn(5, 1)
+    system_index = torch.tensor([0, 0, 1, 1, 1])
+
+    before, _ = module(charges, features, system_index, 2)
+    with torch.no_grad():
+        for layer in module.layers_quad:
+            layer.weight.mul_(2)
+    after, _ = module(charges, features, system_index, 2)
+    assert not torch.allclose(before, after)
+
+
 @pytest.mark.parametrize("operation", ["add", "sub", "mul", "truediv", "pow"])
 def test_node_algebra(operation):
     from hippynn.graphs.nodes.base import ValueNode

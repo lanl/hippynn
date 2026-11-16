@@ -119,6 +119,6 @@ class Optimizer:
             debatched_coords = debatch_coords(coords, self.masks)
 
         prefix_list = prefix_list or list(range(N))
-        for n, c, prefix in zip(self.debatched_numbers, debatched_coords, prefix_list):
+        for n, c, prefix in zip(self.debatched_numbers, debatched_coords, prefix_list, strict=True):
             atoms = Atoms(numbers=n.cpu(), positions=c.cpu())
             atoms.write("%s_traj.xyz" % (prefix), append=True)

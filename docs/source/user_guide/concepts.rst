@@ -54,5 +54,21 @@ Experiment
 
 An experiment is a training run.
 
+Active directory
+^^^^^^^^^^^^^^^^
+
+hippynn writes its own files (checkpoints, metrics, plots, and ``log_terminal`` files)
+into the active directory, which is the current working directory unless changed with ``active_directory``::
+
+    with hippynn.active_directory("my_experiment"):
+        with hippynn.log_terminal("training_log.txt", "wt"):
+            database = hippynn.databases.DirectoryDatabase(directory="datasets/qm7", ...)
+            hippynn.experiment.setup_and_train(training_modules, database, setup_params)
+
+The working directory is not changed, so ``datasets/qm7`` is found relative to where the script was run,
+while outputs go into ``my_experiment/``. Your own files can be placed there with
+``open(hippynn.active_directory / "x.txt")``, or pass ``chdir=True`` to also change the working directory.
+The active directory is local to the current thread.
+
 
 

@@ -8,7 +8,7 @@ from hippynn.tools import active_directory, device_fallback
 from hippynn.interfaces.lammps_interface import MLIAPInterface
 
 def save_model_for_lammps(model_folder, species_names_ordered, mliap_filename = "mliap_unified_hippynn.pt"):
-    with active_directory(model_folder, create=False):
+    with active_directory(model_folder, create=False, chdir=True):  # torch.save below uses a bare filename
         bundle = load_checkpoint_from_cwd(map_location='cpu')
 
         model = bundle["training_modules"].model

@@ -11,8 +11,8 @@ import torch
 from ..databases import Database
 from ..databases.restarter import Restartable
 from ..graphs import GraphModule
-from ..tools import device_fallback
-from .._deprecations import bundles_deprecated_warnings
+from ..tools import device_fallback, active_directory
+from .._deprecations import bundles_deprecated_warnings, warn_name_change
 from .assembly import TrainingModules
 from .controllers import Controller
 from .device import set_devices
@@ -65,7 +65,7 @@ def create_structure_file(
     if isinstance(database, Restartable):
         structure["database"] = database.restarter
 
-    with open(fname, "wb") as pfile:
+    with open(active_directory / fname, "wb") as pfile:
         torch.save(structure, pfile)
 
 
@@ -114,7 +114,9 @@ def check_mapping_devices(map_location, model_device):
 
 
 @bundles_deprecated_warnings(stacklevel=2)
-def load_saved_tensors(structure_fname: str, state_fname: str, weights_only: bool = False, **kwargs) -> Tuple[dict, dict]:
+def load_saved_tensors(
+    structure_fname: str, state_fname: str, weights_only: bool = False, directory=None, **kwargs
+) -> Tuple[dict, dict]:
     """
     Load torch tensors from file.
 
@@ -122,24 +124,33 @@ def load_saved_tensors(structure_fname: str, state_fname: str, weights_only: boo
         This function uses ``torch.load`` with ``weights_only=False`` by default,
         which can run arbitrary code from the loaded file. Only use it with files
         you trust. You can set ``weights_only=True`` for better security, but
-        it may cause loading of the structure file to fail. 
+        it may cause loading of the structure file to fail.
 
     :param structure_fname: name of the structure file
     :param state_fname: name of the state file
     :param weights_only: passed to ``torch.load``
+    :param directory: directory containing the files, defaults to the ``hippynn.active_directory``
     :return: loaded dictionaries of checkpoint and model parameters
     """
 
-    with open(structure_fname, "rb") as pfile:
-        structure = torch.load(pfile, weights_only=weights_only, **kwargs)
+    with active_directory(directory, create=False) as directory:
+        with open(directory / structure_fname, "rb") as pfile:
+            structure = torch.load(pfile, weights_only=weights_only, **kwargs)
 
-    with open(state_fname, "rb") as pfile:
-        state = torch.load(pfile, weights_only=weights_only, **kwargs)
+        with open(directory / state_fname, "rb") as pfile:
+            state = torch.load(pfile, weights_only=weights_only, **kwargs)
     return structure, state
 
 
 def load_checkpoint(
-    structure_fname: str, state_fname: str, restart_db=False, map_location=None, model_device=None, weights_only=False, **kwargs
+    structure_fname: str,
+    state_fname: str,
+    restart_db=False,
+    map_location=None,
+    model_device=None,
+    weights_only=False,
+    directory=None,
+    **kwargs,
 ) -> dict:
     """
     Load checkpoint file from given filename.
@@ -158,13 +169,14 @@ def load_checkpoint(
     :param map_location: device mapping argument for ``torch.load``, defaults to None
     :param model_device: automatically handle device mapping. Defaults to None, defaults to None
     :param weights_only: passed to ``torch.load``, defaults to False
+    :param directory: directory containing the files, defaults to the ``hippynn.active_directory``
     :return: experiment structure
     """
 
     # we need keep the original map_location value for the if
     mapped, model_device = check_mapping_devices(map_location, model_device)
     kwargs["map_location"] = mapped
-    structure, state = load_saved_tensors(structure_fname, state_fname, weights_only=weights_only, **kwargs)
+    structure, state = load_saved_tensors(structure_fname, state_fname, weights_only=weights_only, directory=directory, **kwargs)
 
     # transfer stuff back to model_device
     structure = restore_checkpoint(structure, state, restart_db=restart_db)
@@ -183,9 +195,9 @@ def load_checkpoint(
     return structure
 
 
-def load_checkpoint_from_cwd(map_location=None, model_device=None, weights_only=False, **kwargs) -> dict:
+def load_checkpoint_from_active_directory(map_location=None, model_device=None, weights_only=False, **kwargs) -> dict:
     """
-    Same as ``load_checkpoint``, but using default filenames.
+    Same as ``load_checkpoint``, but using default filenames in the ``active_directory``.
 
     .. Warning::
         This function uses ``torch.load`` with ``weights_only=False`` by default,
@@ -207,15 +219,15 @@ def load_checkpoint_from_cwd(map_location=None, model_device=None, weights_only=
     )
 
 
-def load_model_from_cwd(map_location=None, model_device=None, weights_only=False, **kwargs) -> GraphModule:
+def load_model_from_active_directory(map_location=None, model_device=None, weights_only=False, **kwargs) -> GraphModule:
     """
-    Only load model from current working directory.
+    Only load model from the ``active_directory``.
 
     .. Warning::
         This function uses ``torch.load`` with ``weights_only=False`` by default,
         which can run arbitrary code from the loaded file. Only use it with files
         you trust. You can set ``weights_only=True`` for better security, but
-        it may cause loading of the structure file to fail. 
+        it may cause loading of the structure file to fail.
 
     :param map_location: device mapping argument for ``torch.load``, defaults to None
     :type map_location: Union[str, dict, torch.device, Callable], optional
@@ -235,4 +247,20 @@ def load_model_from_cwd(map_location=None, model_device=None, weights_only=False
         model = model.to(model_device)
 
     return model
+
+
+def load_checkpoint_from_cwd(*args, **kwargs):
+    """
+    Deprecated name for :func:`load_checkpoint_from_active_directory`.
+    """
+    warn_name_change("load_checkpoint_from_cwd", load_checkpoint_from_active_directory)
+    return load_checkpoint_from_active_directory(*args, **kwargs)
+
+
+def load_model_from_cwd(*args, **kwargs):
+    """
+    Deprecated name for :func:`load_model_from_active_directory`.
+    """
+    warn_name_change("load_model_from_cwd", load_model_from_active_directory)
+    return load_model_from_active_directory(*args, **kwargs)
 

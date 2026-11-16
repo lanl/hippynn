@@ -53,7 +53,7 @@ def evaluate(parameters: dict, trial_index: int):
     """
 
     # train model
-    with hippynn.tools.active_directory(str(trial_index)):
+    with hippynn.tools.active_directory(str(trial_index), chdir=True):  # trial datasets use paths relative to the trial dir
         out = training(**parameters)
     # get the loss
     return {"Metric": out["valid"]["Loss"]}

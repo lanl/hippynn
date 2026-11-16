@@ -7,6 +7,8 @@ Misc. helpful functions which are not part of the library organization per se.
 import sys, os, pathlib, traceback, warnings, functools
 import collections
 import contextlib
+from contextvars import ContextVar
+from typing import Optional, Union
 
 import numpy as np
 import torch
@@ -27,10 +29,29 @@ class TeedFileOutput:
             stream.flush(*arg, **kwargs)
 
 
+class _ContextLocalFile:
+    """
+    Writes to `file`, but only from contexts (thread, or task in asyncio) where `file` is active.
+    """
+
+    active_files = ContextVar("hippynn.log_terminal", default=())
+
+    def __init__(self, file):
+        self.file = file
+
+    def write(self, *arg, **kwargs):
+        if self.file in self.active_files.get():
+            self.file.write(*arg, **kwargs)
+
+    def flush(self, *arg, **kwargs):
+        if self.file in self.active_files.get():
+            self.file.flush(*arg, **kwargs)
+
+
 @contextlib.contextmanager
 def log_terminal(file, *args, **kwargs):
     """
-    :param: file: filename or string
+    :param: file: filename or string; relative filenames are placed in the ``active_directory``.
     :param: args:   piped to ``open(file,*args,**kwargs)`` if file is a string
     :param: kwargs: piped to ``open(file,*args,**kwargs)`` if file is a string
 
@@ -39,69 +60,113 @@ def log_terminal(file, *args, **kwargs):
     The manager yields the file. Writes to the opened file object with
     "with log_terminal(...) as <file>" will not automatically
     be piped into the terminal.
+
+    Only output from the current context (thread, or task in asyncio) is logged.
     """
     if getattr(file, "write", None) is None:
-        close_on_exit = True
-        file = open(file, *args, **kwargs)
+        file_context = open(active_directory / file, *args, **kwargs)
     else:
-        close_on_exit = False
-    teed_stderr = TeedFileOutput(file, sys.stderr)
-    teed_stdout = TeedFileOutput(file, sys.stdout)
-    with contextlib.redirect_stderr(teed_stderr):
-        with contextlib.redirect_stdout(teed_stdout):
-            try:
-                yield file
-            except:
-                print("Uncaught exception, logging interrupted.", file=teed_stderr)
-                traceback.print_exc(file=file)
-                raise
-            finally:
-                if close_on_exit:
-                    file.close()
+        file_context = contextlib.nullcontext(file)
+
+    with file_context as file, _ContextLocalFile.active_files.set((*_ContextLocalFile.active_files.get(), file)):
+        with contextlib.redirect_stdout(TeedFileOutput(_ContextLocalFile(file), sys.stdout)):
+            with contextlib.redirect_stderr(TeedFileOutput(_ContextLocalFile(file), sys.stderr)):
+                try:
+                    yield file
+                except:
+                    print("Uncaught exception, logging interrupted.", file=sys.stderr)
+                    traceback.print_exc(file=file)
+                    raise
 
 
-@contextlib.contextmanager
-def active_directory(dirname, create=None):
+class ContextDirectory:
     """
-    Context manager for temporarily switching the current working directory.
+    A directory which can be switched for a block of code with ``with directory(dirname):``.
+    This does not change the working directory, and only applies to the current context
+    (thread, or task in asyncio).
 
-    If create is None, always succeed.
-    If create is True, only succeed if the directory does not exist, and create one.
-    If create is False, only succeed if the directory does exist, and switch to it.
+    It can be used as a path (``directory / "file.pt"``, ``os.fspath(directory)``), which evaluates
+    to the directory at the time of use. By default, this is the current working directory.
+    Not hashable, because the value changes; use ``directory.resolve()`` for a fixed path.
 
-    In other words, use create=True if you want to force that it's a new directory.
-    Use create=False if you want to switch to an existing directory.
-    Use create=None create a directory if you are okay with either alternative.
-
-    :param dirname: directory to enter
-    :param create: (None,True,False)
-
-    :return: None
-    :raises: If directory status not compatible with `create` constraints.
+    :param name: name of the underlying :class:`~contextvars.ContextVar`. Like context variables,
+      instances should be created at module level.
     """
-    if create not in (None, True, False):
-        raise ValueError("Argument 'create' must be one of None, True, or False")
 
-    exists = os.path.exists(dirname)
+    def __init__(self, name: str):
+        self.directory = ContextVar(name, default=None)
 
-    if create is True and exists:
-        raise FileExistsError(
-            f"Directory '{dirname}' exists already. Pass create=False or create=None to "
-            "allow switching to an existing directory."
-        )
-    if create is False and not exists:
-        raise FileNotFoundError(
-            f"Directory '{dirname}' not found. Pass create=True or create=None to allow creation of the directory."
-        )
-    if not exists and create in (None, True):
-        os.makedirs(dirname)
+    def resolve(self) -> pathlib.Path:
+        return self.directory.get() or pathlib.Path.cwd()
 
-    return_dir = os.getcwd()
-    os.chdir(dirname)
-    try:
-        yield
-    finally:
-        os.chdir(return_dir)
+    @contextlib.contextmanager
+    def __call__(self, dirname: Optional[Union[str, os.PathLike]], create: Optional[bool] = None, chdir: bool = False):
+        """
+        Context manager for temporarily switching the directory.
+
+        If create is None, always succeed.
+        If create is True, only succeed if the directory does not exist, and create one.
+        If create is False, only succeed if the directory does exist, and switch to it.
+
+        In other words, use create=True if you want to force that it's a new directory.
+        Use create=False if you want to switch to an existing directory.
+        Use create=None create a directory if you are okay with either alternative.
+
+        :param dirname: directory to enter, relative to the current directory of this object.
+          If None, the directory is not changed.
+        :param create: (None,True,False)
+        :param chdir: Also change the working directory. This affects all relative paths, such as dataset paths.
+
+        :return: context manager yielding the directory
+        :raises: If directory status not compatible with `create` constraints.
+        """
+        if dirname is None:
+            yield self.resolve()
+            return
+
+        dirname = self.resolve() / dirname
+
+        if create not in (None, True, False):
+            raise ValueError("Argument 'create' must be one of None, True, or False")
+        exists = os.path.exists(dirname)
+
+        if create is True and exists:
+            raise FileExistsError(
+                f"Directory '{dirname}' exists already. Pass create=False or create=None to "
+                "allow switching to an existing directory."
+            )
+        if create is False and not exists:
+            raise FileNotFoundError(
+                f"Directory '{dirname}' not found. Pass create=True or create=None to allow creation of the directory."
+            )
+        if not exists and create in (None, True):
+            os.makedirs(dirname)
+
+        with self.directory.set(dirname), (contextlib.chdir(dirname) if chdir else contextlib.nullcontext()):
+            yield dirname
+
+
+    def __fspath__(self) -> str:
+        return str(self.resolve())
+
+    __str__ = __fspath__
+
+    def __truediv__(self, other: Union[str, os.PathLike]) -> pathlib.Path:
+        return self.resolve() / other
+
+    def __eq__(self, other) -> bool:
+        if isinstance(other, (str, os.PathLike)):
+            return self.resolve() == pathlib.Path(other)
+        return NotImplemented
+
+    def __hash__(self):
+        raise TypeError(f"{type(self).__name__} is not hashable; use .resolve() to get a fixed path.")
+
+
+# Directory where hippynn writes and reads its own files, such as checkpoints, logs, and plots.
+# Use as a context manager to set a temporary active directory.
+# under the hood, thread-safe via ContextVars
+active_directory = ContextDirectory("hippynn.active_directory")
 
 
 @contextlib.contextmanager
@@ -113,10 +178,10 @@ def open_if_needed(file, mode="r"):
     not closed on exit); otherwise `file` is treated as a filename, opened with `mode`, and closed
     on exit.
 
-    :param file: filename or an already-open file object
+    :param file: filename (str or path-like) or an already-open file object
     :param mode: passed to ``open()`` if `file` is a filename
     """
-    if isinstance(file, str):
+    if isinstance(file, (str, os.PathLike)):
         with open(file, mode) as fh:
             yield fh
     else:
@@ -137,7 +202,7 @@ def infer_filetype(file, filetype, filetypes, aliases=None):
     """
     if filetype is not None:
         return filetype
-    if isinstance(file, str):
+    if isinstance(file, (str, os.PathLike)):
         suffix = pathlib.Path(file).suffix.lstrip(".").lower()
         suffix = (aliases or {}).get(suffix, suffix)
         if suffix in filetypes:
@@ -180,10 +245,8 @@ def param_print(module):
 def device_fallback():
     if torch.cuda.is_available():
         device = torch.device(torch.cuda.current_device())
-    elif hasattr(torch, "get_default_device"):
-        device = torch.get_default_device()
     else:
-        device = torch.device("cpu")
+        device = torch.get_default_device()
     print("Device was not specified. Attempting to default to device:", device)
     device = torch.device(device.type)
     return device
@@ -302,21 +365,8 @@ def recursive_param_count(state_dict, n=0):
     return n
 
 
-try:
-    torch.serialization.add_safe_globals
-    def add_safe_globals(*args,**kwargs):
-        """
-        Backwards-compatible alias of torch.serialization.add_safe_globals
-        """
-        return torch.serialization.add_safe_globals(*args,**kwargs)
-
-except AttributeError:
-    # Older version of pytorch.
-    def add_safe_globals(*args,**kwargs):
-        """
-        Backwards-compatible alias of torch.serialization.add_safe_globals
-        """
-        pass
+# Backwards-compatible alias.
+add_safe_globals = torch.serialization.add_safe_globals
 
 
 class SetStateMixin:

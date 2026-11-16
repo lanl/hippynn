@@ -30,7 +30,7 @@ class MultiGradient(torch.nn.Module):
             generalized_coordinates = (generalized_coordinates,)
         assert len(generalized_coordinates) == len(self.signs), f"Number of items to take derivative w.r.t ({len(generalized_coordinates)}) must match number of provided signs ({len(self.signs)})."
         grads = torch.autograd.grad(molecular_energies.sum(), generalized_coordinates, create_graph=True)
-        return tuple((sign * grad for sign, grad in zip(self.signs, grads)))
+        return tuple((sign * grad for sign, grad in zip(self.signs, grads, strict=True)))
 
 
 class Hessian(torch.nn.Module):

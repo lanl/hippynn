@@ -1,3 +1,5 @@
+import os
+
 import pytest
 
 import torch
@@ -151,6 +153,7 @@ def temporary_directory():
     
     temp_name = "TEST_TMP_DIRECTORY"
     with tempfile.TemporaryDirectory(prefix=temp_name) as tempdir:
-        with hippynn.active_directory(tempdir, create=False):
+        tempdir = os.path.realpath(tempdir)  # match os.getcwd() on macOS, where /var -> /private/var
+        with hippynn.active_directory(tempdir, create=False, chdir=True):
             yield tempdir   # test runs here.
 
