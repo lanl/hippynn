@@ -79,8 +79,7 @@ def calculate_rdf(positions: np.ndarray, cutoff: float, cells: np.ndarray, speci
     positions, cells = ensure_positions_cells_compatibility(positions, cells)
     positions, species = ensure_positions_species_compatibility(positions, species)
 
-    if cells is not None: 
-        cells = extract_multicell_diagonal(cells)
+    cells = extract_multicell_diagonal(cells)
 
     check_KDTree_compatibility(cells, cutoff=cutoff)
 

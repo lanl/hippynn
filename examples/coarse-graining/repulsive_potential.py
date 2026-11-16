@@ -168,7 +168,7 @@ class RepulsivePotentialPolynomialBySpecies(torch.nn.Module):
         mol_energy = self.summer(pair_energies.unsqueeze(-1), mol_index, n_molecules, pair_first)
         return mol_energy, atom_energies,
 
-class RepulsivePotentialPolynomialBySpeciesNode(ExpandParents, AutoKw, MultiNode):
+class RepulsivePotentialPolynomialBySpeciesNode(ExpandParents, AutoModule, MultiNode):
     input_names = "pair_dist", "pair_first", "pair_second", "mol_index", "n_molecules", "n_atoms_max", "spec"
     output_names = "mol_energy", "atom_energies",
     auto_module_class = RepulsivePotentialPolynomialBySpecies

@@ -18,7 +18,7 @@ import torch
 import ase
 import time
 
-from hippynn.experiment.serialization import load_checkpoint_from_cwd
+from hippynn.experiment.checkpoints import load_checkpoint_from_active_directory
 from hippynn.tools import active_directory
 from hippynn.interfaces.ase_interface import HippynnCalculator
 import ase.build
@@ -30,7 +30,7 @@ from ase.lattice.cubic import FaceCenteredCubic
 # Load the files
 try:
     with active_directory("TEST_ALUMINUM_MODEL_MULTILAYER", create=False):
-        bundle = load_checkpoint_from_cwd(map_location='cpu')
+        bundle = load_checkpoint_from_active_directory(map_location='cpu')
 except FileNotFoundError:
     raise FileNotFoundError("Model not found, run ani_aluminum_example_multilayer.py first!")
 

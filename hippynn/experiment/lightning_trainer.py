@@ -28,7 +28,7 @@ from .controllers import Controller
 from .metric_tracker import MetricTracker
 from .step_functions import get_step_function, StandardStep
 from ..tools import print_lr
-from . import serialization
+from .checkpoints import DEFAULT_STRUCTURE_FNAME
 
 
 class HippynnLightningModule(pl.LightningModule):
@@ -175,7 +175,7 @@ class HippynnLightningModule(pl.LightningModule):
 
         if not self.structure_file:
             # Perform change on all ranks.
-            sf = serialization.DEFAULT_STRUCTURE_FNAME
+            sf = DEFAULT_STRUCTURE_FNAME
             self.structure_file = sf
 
         if self.global_rank == 0 and not self.structure_file:
@@ -221,7 +221,7 @@ class HippynnLightningModule(pl.LightningModule):
             # and that experiment file is stored at <model_name>/version_<n>/experiment_structure.pt
             structure_file = Path(checkpoint_path)
             structure_file = structure_file.parent.parent
-            structure_file = structure_file.joinpath(serialization.DEFAULT_STRUCTURE_FNAME)
+            structure_file = structure_file.joinpath(DEFAULT_STRUCTURE_FNAME)
 
         structure_args = torch.load(structure_file, weights_only=weights_only)
 

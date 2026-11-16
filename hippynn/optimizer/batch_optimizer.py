@@ -38,7 +38,7 @@ class Optimizer:
             algorithm = algorithm()
 
         if device is None:
-            device = device_fallback
+            device = device_fallback()
         self.device = device
 
         # TODO: possibly put this kind of logic into a separate function for re-use
