@@ -102,7 +102,7 @@ def _assert_tupleform(input_tuple, type_tuple):
         )
 
     # If it does, it needs to have the correct type for each entry in the tuple.
-    for i, (n, cls) in enumerate(zip(input_tuple, type_tuple)):
+    for i, (n, cls) in enumerate(zip(input_tuple, type_tuple, strict=True)):
         if not isinstance(n, cls):
             raise TupleTypeMismatch(str(type_tuple) + ": wrong type at index {}".format(i))
     return True
@@ -270,7 +270,7 @@ class FormHandler:
 
 
 def _fn_doc_adjust(form, fn):
-    if fn.__module__ is __name__:
+    if fn.__module__ == __name__:
         # Don't document functions that live here, they are used many many times.
         return
     try:
@@ -340,7 +340,7 @@ class IndexFormTransformer(FormTransformer):
     def fn(self, node_self, *parents, **kwargs):
         """Coerces index states for all parents"""
         new_parents = []
-        for node, idxstate in zip(parents, self.idxstates):
+        for node, idxstate in zip(parents, self.idxstates, strict=True):
             if idxstate is None:
                 new = node
             else:

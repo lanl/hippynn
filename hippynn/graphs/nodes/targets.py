@@ -196,7 +196,7 @@ class AtomizationEnergyNode(Energies, HAtomRegressor, ExpandParents, AutoModule,
         weights = [x.weight for x in self.torch_module.layers]
 
         # Calculate the total bias terms per species.
-        en_contributions = [w @ x.T for w, x in zip(weights, feature_list)]
+        en_contributions = [w @ x.T for w, x in zip(weights, feature_list, strict=True)]
         total_e0 = -sum(en_contributions)
 
         # Build HEnergyNode which matches the AtomizationEnergy module.
@@ -208,7 +208,7 @@ class AtomizationEnergyNode(Energies, HAtomRegressor, ExpandParents, AutoModule,
         en_0_layer.weight = torch.nn.Parameter(total_e0)
         en_0_layer.bias = None
 
-        for lay1, lay2 in zip(henergy_mod.layers[1:], self.torch_module.layers):
+        for lay1, lay2 in zip(henergy_mod.layers[1:], self.torch_module.layers, strict=True):
             lay1.weight = lay2.weight
             # lay1.bias.set_(torch.zeros_like(lay1.bias))
             lay1.bias = lay2.bias

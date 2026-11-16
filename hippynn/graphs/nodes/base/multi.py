@@ -58,7 +58,7 @@ class MultiNode(Node,_DeprecatedNamesMixin):  # Multinode
 
         self.children = tuple(
             IndexNode(name + "." + cn, (self,), index=i, index_state=cidx)
-            for i, (cn, cidx) in enumerate(zip(self.output_names, self.output_index_states))
+            for i, (cn, cidx) in enumerate(zip(self.output_names, self.output_index_states, strict=True))
         )
     
         if db_name is not None:

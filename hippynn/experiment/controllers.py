@@ -89,7 +89,7 @@ class Controller:
 
     def load_state_dict(self, state_dict):
 
-        for sch, sdict in zip(self.scheduler_list, state_dict["scheduler"]):
+        for sch, sdict in zip(self.scheduler_list, state_dict["scheduler"], strict=True):
             sch.load_state_dict(sdict)
 
         if self.optimizer is not None:

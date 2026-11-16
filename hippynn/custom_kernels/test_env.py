@@ -370,7 +370,7 @@ class EnvOpsTester:
         print()  # Newline to terminate the '...' printing
         for t in [tne, tns, tnf] + [te, ts, tf]:
             print("Mean {} time: {} Median: {}".format(t.name, t.mean_elapsed, t.median_elapsed))
-        for tn, t in zip([tne, tns, tnf], [te, ts, tf]):
+        for tn, t in zip([tne, tns, tnf], [te, ts, tf], strict=True):
             print("{} Speedup: {}".format(t.name, tn.median_elapsed / t.median_elapsed))
 
         tnsum = sum(x.median_elapsed for x in [tne, tns, tnf])

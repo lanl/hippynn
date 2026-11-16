@@ -120,7 +120,7 @@ class Predictor:
         self.out_dbnames.append(source.db_name)
 
     def wrap_outputs(self, out_dict):
-        for (node, tensor), dbname, name in zip(out_dict.copy().items(), self.out_dbnames, self.out_names):
+        for (node, tensor), dbname, name in zip(out_dict.copy().items(), self.out_dbnames, self.out_names, strict=True):
             out_dict[name] = tensor
             out_dict[dbname] = tensor
         return out_dict
@@ -203,7 +203,7 @@ class Predictor:
 
         out_values = self.graph(*input_values)
 
-        out_dict = {k: v for k, v in zip(self.outputs, out_values)}
+        out_dict = {k: v for k, v in zip(self.outputs, out_values, strict=True)}
 
         if not self.requires_grad:
             out_dict = {k: v.detach() for k, v in out_dict.items()}

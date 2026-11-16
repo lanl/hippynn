@@ -334,7 +334,7 @@ def construct_outputs(output_classes: Dict[str, List[Node]], prefix: str) -> Dic
 
             reduced_ensemble_node = EnsembleTarget(name=name, parents=reduced_parents)
 
-            for db_child, reduced_child in zip(ensemble_node.children, reduced_ensemble_node.children):
+            for db_child, reduced_child in zip(ensemble_node.children, reduced_ensemble_node.children, strict=True):
                 assign_index_aliases(db_child, reduced_child)
 
     return ensemble_outputs

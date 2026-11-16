@@ -32,7 +32,7 @@ class HEnergy(torch.nn.Module):
         biases = (first_is_interacting, *(True for _ in range(self.n_terms - 1)))
 
         self.layers = torch.nn.ModuleList(
-            torch.nn.Linear(nf, n_target, bias=bias) for nf, bias in zip(feature_sizes, biases)
+            torch.nn.Linear(nf, n_target, bias=bias) for nf, bias in zip(feature_sizes, biases, strict=True)
         )
 
     def forward(self, all_features, system_index, n_systems):
@@ -47,7 +47,7 @@ class HEnergy(torch.nn.Module):
         if self.first_is_interacting:
             all_features = all_features[1:]
 
-        partial_energies = [lay(x) for x, lay in zip(all_features, self.layers)]
+        partial_energies = [lay(x) for x, lay in zip(all_features, self.layers, strict=True)]
         partial_terms = [self.summer(x, system_index, n_systems) for x in partial_energies]
         partial_sums = [partial_terms[0]]
         z = partial_terms[0]
@@ -60,11 +60,11 @@ class HEnergy(torch.nn.Module):
 
         if self.n_terms > 1:
             partial_esq = [torch.square(x) for x in partial_energies]
-            partial_atom_hier = [x / (x + y) for x, y in zip(partial_esq[1:], partial_esq[:-1])]
+            partial_atom_hier = [x / (x + y) for x, y in zip(partial_esq[1:], partial_esq[:-1], strict=True)]
             mol_hier = [self.summer(x, system_index, n_systems)/self.summer(x+y, system_index, n_systems)
-                        for x,y in zip(partial_esq[1:], partial_esq[:-1])]
+                        for x,y in zip(partial_esq[1:], partial_esq[:-1], strict=True)]
             mol_hier = sum(mol_hier)
-            partial_batch_hier = [x.sum() / (x.sum() + y.sum()) for x, y in zip(partial_esq[1:], partial_esq[:-1])]
+            partial_batch_hier = [x.sum() / (x.sum() + y.sum()) for x, y in zip(partial_esq[1:], partial_esq[:-1], strict=True)]
             batch_hier = sum(partial_batch_hier)
             total_atom_hier = sum(partial_atom_hier)
             total_hier = self.summer(total_atom_hier, system_index, n_systems)
@@ -91,7 +91,7 @@ class HCharge(torch.nn.Module):
         self.n_target = n_target
         biases = (first_is_interacting, *(True for _ in range(self.n_terms - 1)))
         self.layers = torch.nn.ModuleList(
-            torch.nn.Linear(nf, n_target, bias=bias) for nf, bias in zip(feature_sizes, biases)
+            torch.nn.Linear(nf, n_target, bias=bias) for nf, bias in zip(feature_sizes, biases, strict=True)
         )
 
     def forward(self, all_features):
@@ -99,7 +99,7 @@ class HCharge(torch.nn.Module):
         :param all_features a list of feature tensors:
         :return: charges, predicted charges summed at each layer, and charge hierarchcality
         """
-        partial_charges = [lay(x) for x, lay in zip(all_features, self.layers)]
+        partial_charges = [lay(x) for x, lay in zip(all_features, self.layers, strict=True)]
         partial_sums = [partial_charges[0]]
         z = partial_charges[0]
         for x in partial_charges[1:]:
@@ -110,7 +110,7 @@ class HCharge(torch.nn.Module):
 
         if self.n_terms > 1:
             partial_esq = [x ** 2 for x in partial_charges]
-            partial_atom_hier = [x / (x + y) for x, y in zip(partial_esq[1:], partial_esq[:-1])]
+            partial_atom_hier = [x / (x + y) for x, y in zip(partial_esq[1:], partial_esq[:-1], strict=True)]
             charge_hier = sum(x for x in partial_atom_hier)
         else:
             charge_hier = None
@@ -223,12 +223,12 @@ class HBondSymmetric(torch.nn.Module):
         # Einsum implementation of combined partial_bond_dists and partial_bond operations..
         partial_bonds = [
             torch.einsum("bf,bg,bs,stfg->bt",f[pair_first],f[pair_second],sense_vals,w)
-            for f,w in zip(all_features,weights)
+            for f,w in zip(all_features,weights, strict=True)
         ]
         
 
         if self.positive:
-            partial_bonds = [pb + b for pb, b in zip(partial_bonds, self.biases)]
+            partial_bonds = [pb + b for pb, b in zip(partial_bonds, self.biases, strict=True)]
 
         total_bonds = sum(partial_bonds)
         if self.positive:
@@ -236,7 +236,7 @@ class HBondSymmetric(torch.nn.Module):
 
         if self.n_terms > 1:
             partial_bsq = [b ** 2 for b in partial_bonds]
-            partial_hier = [x / (x + y) for x, y in zip(partial_bsq[1:], partial_bsq[:-1])]
+            partial_hier = [x / (x + y) for x, y in zip(partial_bsq[1:], partial_bsq[:-1], strict=True)]
             bond_hier = sum(partial_hier)
         else:
             bond_hier = torch.zeros_like(total_bonds)
@@ -276,20 +276,20 @@ class AtomizationEnergy(torch.nn.Module):
         all_features = all_features[1:]
 
         # get vacuum features for each atom and subtract them
-        vacuum_energies = sum([lay(x) for x, lay in zip(vacuum_features, self.layers)])
+        vacuum_energies = sum([lay(x) for x, lay in zip(vacuum_features, self.layers, strict=True)])
         encoding = encoding.to(all_features[0].dtype)
         vacuum_features_eachatom = [encoding @ f for f in vacuum_features]
-        renorm_features = [x - v for x, v in zip(all_features, vacuum_features_eachatom)]
+        renorm_features = [x - v for x, v in zip(all_features, vacuum_features_eachatom, strict=True)]
 
         # Compute!
-        en_terms = [lay(r) for r, lay in zip(renorm_features, self.layers)]
+        en_terms = [lay(r) for r, lay in zip(renorm_features, self.layers, strict=True)]
         total_atomen = sum(en_terms)
         total_energies = self.summer(total_atomen, system_index, n_systems)
 
         e0 = encoding @ vacuum_energies
         if self.n_terms > 1:
             partial_esq = [x ** 2 for x in en_terms]
-            partial_atom_hier = [x / (x + y) for x, y in zip(partial_esq[1:], partial_esq[:-1])]
+            partial_atom_hier = [x / (x + y) for x, y in zip(partial_esq[1:], partial_esq[:-1], strict=True)]
             total_atom_hier = sum(x for x in partial_atom_hier)
             total_hier = self.summer(total_atom_hier, system_index, n_systems)
         else:

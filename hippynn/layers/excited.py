@@ -80,7 +80,7 @@ class LocalEnergy(torch.nn.Module):
         self.n_terms = len(feature_sizes)
         biases = (first_is_interacting, *(True for _ in range(self.n_terms - 1)))
 
-        self.layers = torch.nn.ModuleList(torch.nn.Linear(nf, 1, bias=bias) for nf, bias in zip(feature_sizes, biases))
+        self.layers = torch.nn.ModuleList(torch.nn.Linear(nf, 1, bias=bias) for nf, bias in zip(feature_sizes, biases, strict=True))
         self.players = torch.nn.ModuleList(torch.nn.Linear(nf, 1, bias=False) for nf in feature_sizes)
         self.ninf = float("-inf")
 
@@ -97,9 +97,9 @@ class LocalEnergy(torch.nn.Module):
         if self.first_is_interacting:
             all_features = all_features[1:]
 
-        partial_preenergy = [lay(x) for x, lay in zip(all_features, self.layers)]
+        partial_preenergy = [lay(x) for x, lay in zip(all_features, self.layers, strict=True)]
         atom_preenergy = sum(partial_preenergy)
-        partial_potentials = [lay(x) for x, lay in zip(all_features, self.players)]
+        partial_potentials = [lay(x) for x, lay in zip(all_features, self.players, strict=True)]
         propensity = sum(partial_potentials)  # Keep in mind that this has shape (natoms,1)
 
         # This segment does not need gradients, we are constructing the subtraction parameters for softmax

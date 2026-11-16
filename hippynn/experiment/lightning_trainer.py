@@ -335,7 +335,7 @@ class HippynnLightningModule(pl.LightningModule):
         all_losses = [x.item() for x in self.eval_loss(*all_predictions, *all_targets)]
         self.eval_step_outputs.clear()  # free memory
 
-        loss_dict = {name: value for name, value in zip(self.eval_names, all_losses)}
+        loss_dict = {name: value for name, value in zip(self.eval_names, all_losses, strict=True)}
 
         self.log_dict({prefix + k: v for k, v in loss_dict.items()}, sync_dist=True)
 
