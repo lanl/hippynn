@@ -136,7 +136,7 @@ with hippynn.tools.active_directory(netname):
 
         torch.set_default_dtype(torch.float64)  # Temporary for data pre-processing
         database = PyAniDirectoryDB(
-            directory="../../../datasets/ani-al/data/",
+            directory="../../datasets/ani-al/data/",
             seed=1001,  # Random seed for splitting data
             quiet=False,
             allow_unfound=True,  # allows post-loading preprocessing of arrays

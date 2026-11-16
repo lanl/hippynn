@@ -102,7 +102,7 @@ pairs = model.graph.node_from_name("pairs")
 pairs.skin = 3 # see hippynn.graphs.nodes.pairs.KDTreePairsMemory documentation
 
 # Run MD
-with active_directory("md_results"):
+with active_directory("md_results", chdir=True):  # user code below writes bare filenames
     with log_terminal("md_log.txt", "wt"):
         emdee = MolecularDynamics(
             variables=[positions_variable, species_variable, cell_variable],

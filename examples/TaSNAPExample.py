@@ -116,7 +116,7 @@ with hippynn.tools.active_directory(netname):
 
         torch.set_default_dtype(torch.float64)  # Temporary for data pre-processing
         database = SNAPDirectoryDatabase(
-            directory="../../../datasets/Ta_Linear_JCP2014/JSON/",
+            directory="../../datasets/Ta_Linear_JCP2014/JSON/",
             seed=0,  # Random seed for splitting data
             quiet=False,
             allow_unfound=True,  # allows post-loading preprocessing of arrays

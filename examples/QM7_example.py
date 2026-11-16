@@ -123,7 +123,7 @@ with hippynn.tools.active_directory(netname):
         max_batch_size = 12
         database_params = {
             "name": "qm7",  # Prefix for arrays in folder
-            "directory": "../../../datasets/qm7_processed",
+            "directory": "../../datasets/qm7_processed",
             "quiet": False,
             "test_size": 0.1,
             "valid_size": 0.1,

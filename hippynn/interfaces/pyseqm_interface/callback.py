@@ -2,6 +2,7 @@ import torch
 import time
 import copy
 from hippynn.experiment import serialization
+from hippynn.tools import active_directory
 
 time_stamps = [time.time()]
 
@@ -53,13 +54,13 @@ def save_and_stop_after(
         if available_time < max_time_per_epoch * 2.0:
             # save before stop
             model = training_modules[0]
-            with open("last_model.pt", "wb") as pfile:
+            with open(active_directory / "last_model.pt", "wb") as pfile:
                 torch.save(copy.deepcopy(model.state_dict()), pfile)
 
             state = serialization.create_state(model, controller, metric_tracker)
 
             # Write the checkpoint
-            with open("last_checkpoint.pt", "wb") as pfile:
+            with open(active_directory / "last_checkpoint.pt", "wb") as pfile:
                 torch.save(state, pfile)
 
             if better_model:
@@ -70,18 +71,18 @@ def save_and_stop_after(
                 if store_all_better:
                     # Save a copy of every network doing better
                     # Note: epoch has already been incremented, so decrement in saving file.
-                    with open(f"better_model_epoch_{epoch}.pt", "wb") as pfile:
+                    with open(active_directory / f"better_model_epoch_{epoch}.pt", "wb") as pfile:
                         torch.save(best_model, pfile)
 
                 if store_best:
                     # Overwrite the "best model so far"
-                    with open("best_model.pt", "wb") as pfile:
+                    with open(active_directory / "best_model.pt", "wb") as pfile:
                         torch.save(best_model, pfile)
 
                     state = serialization.create_state(model, controller, metric_tracker)
 
                     # Write the checkpoint
-                    with open("best_checkpoint.pt", "wb") as pfile:
+                    with open(active_directory / "best_checkpoint.pt", "wb") as pfile:
                         torch.save(state, pfile)
 
             print("time for each epoch: ", time_epoch)

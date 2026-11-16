@@ -122,7 +122,7 @@ with hippynn.tools.active_directory(netname):
         from hippynn.databases.SNAPJson import SNAPDirectoryDatabase
         torch.set_default_dtype(torch.float64)  # Temporary for data pre-processing
         database = SNAPDirectoryDatabase(
-            directory="../../../datasets/InP_JPCA2020/JSON/",
+            directory="../../datasets/InP_JPCA2020/JSON/",
             seed=0,  # Random seed for splitting data
             quiet=False,
             allow_unfound=True,  # allows post-loading preprocessing of arrays

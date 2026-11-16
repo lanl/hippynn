@@ -58,7 +58,7 @@ network_params = {
 # dump parameters to the log file
 print("Network parameters\n\n", json.dumps(network_params, indent=4))
 
-with hippynn.tools.active_directory("TEST_AZOMETHANE_MODEL"):
+with hippynn.tools.active_directory("TEST_AZOMETHANE_MODEL", chdir=True):  # user code below writes bare filenames
     with hippynn.tools.log_terminal("training_log.txt", "wt"):
         # build network
         species = inputs.SpeciesNode(db_name="Z")
@@ -152,7 +152,7 @@ with hippynn.tools.active_directory("TEST_AZOMETHANE_MODEL"):
         # load database
         database = hippynn.databases.DirectoryDatabase(
             name="azo_",  # Prefix for arrays in the directory
-            directory="../../../datasets/azomethane/release/training/",
+            directory="../../datasets/azomethane/release/training/",
             seed=114514,  # Random seed for splitting data
             **db_info,  # Adds the inputs and targets db_names from the model as things to load
         )

@@ -5,6 +5,7 @@ import copy
 from matplotlib import pyplot as plt
 
 from ..graphs import GraphModule
+from ..tools import active_directory
 from .. import settings
 
 
@@ -19,7 +20,7 @@ class PlotMaker:
         :param plotters: Individual plotters to use.
         :param plot_every: How often to make plots during training (in epochs)
         :param save_dir: What directory to store the plots in, relative to the
-         training experiment path.
+         ``hippynn.active_directory`` at the time of plotting.
         """
         self.plotters = plotters
         self.save_dir = save_dir
@@ -43,31 +44,23 @@ class PlotMaker:
         computed_data = self.torch_module(*outputs, *targets)
         remaining_data = computed_data
 
-        location = self.make_full_location(sub_location)
-        print("Making plots. Saved location: {}".format(location))
-
-        for plotter in self.plotters:
-            n_args = len(plotter.parents)
-            this_data = remaining_data[:n_args]
-            remaining_data = remaining_data[n_args:]
-            if plotter.shown or plotter.saved:
-                fig = plotter.make_plot(this_data)
-                if plotter.shown:
-                    plt.show()
-                if plotter.saved:
-                    file = os.path.join(location, plotter.saved)
-                    print("Saving plot at {}".format(file))
-                    fig.savefig(file, transparent=settings.TRANSPARENT_PLOT)
-                plt.close(fig)
-
-    def make_full_location(self, sub_location):
         sub_location = sub_location if sub_location else "Unspecified"
-        location = os.path.join(self.save_dir, sub_location)
-        if os.path.exists(location):
-            warnings.warn("May override plots in {} !".format(location))
-        else:
-            os.makedirs(location)
-        return location
+        with active_directory(os.path.join(self.save_dir, sub_location)) as location:
+            print("Making plots. Saved location: {}".format(location))
+
+            for plotter in self.plotters:
+                n_args = len(plotter.parents)
+                this_data = remaining_data[:n_args]
+                remaining_data = remaining_data[n_args:]
+                if plotter.shown or plotter.saved:
+                    fig = plotter.make_plot(this_data)
+                    if plotter.shown:
+                        plt.show()
+                    if plotter.saved:
+                        file = location / plotter.saved
+                        print("Saving plot at {}".format(file))
+                        fig.savefig(file, transparent=settings.TRANSPARENT_PLOT)
+                    plt.close(fig)
 
     def plot_phase(self, prediction_all_vals, target_all_vals, when, eval_type):
         if when is not None:

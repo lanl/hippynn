@@ -62,7 +62,7 @@ with hippynn.tools.active_directory(netname):
     with hippynn.tools.log_terminal("training_log.txt", "wt"):
         database = hippynn.databases.DirectoryDatabase(
             name="data-qm7",  # Prefix for arrays in the directory
-            directory="../../../datasets/qm7_processed",
+            directory="../../datasets/qm7_processed",
             test_size=0.1,  # Fraction or number of samples to test on
             valid_size=0.1,  # Fraction or number of samples to validate on
             seed=2001,  # Random seed for splitting data
