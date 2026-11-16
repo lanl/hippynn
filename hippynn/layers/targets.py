@@ -126,17 +126,17 @@ class LocalChargeEnergy(torch.nn.Module):
         self.n_terms = len(feature_sizes)
         bias_state = (first_is_interacting, *(True for _ in range(self.n_terms - 1)))
         self.layers_lin = torch.nn.ModuleList(
-            torch.nn.Linear(nf, 1, bias=bias) for nf, bias in zip(feature_sizes, bias_state)
+            torch.nn.Linear(nf, 1, bias=bias) for nf, bias in zip(feature_sizes, bias_state, strict=True)
         )
         self.layers_quad = torch.nn.ModuleList(
-            torch.nn.Linear(nf, 1, bias=bias) for nf, bias in zip(feature_sizes, bias_state)
+            torch.nn.Linear(nf, 1, bias=bias) for nf, bias in zip(feature_sizes, bias_state, strict=True)
         )
         self.summer = indexers.MolSummer()
 
     def forward(self, charges, all_features, system_index, n_systems):
 
-        partial_lin_terms = [lay(x) for x, lay in zip(all_features, self.layers_lin)]
-        partial_quad_terms = [lay(x) for x, lay in zip(all_features, self.layers_lin)]
+        partial_lin_terms = [lay(x) for x, lay in zip(all_features, self.layers_lin, strict=True)]
+        partial_quad_terms = [lay(x) for x, lay in zip(all_features, self.layers_quad, strict=True)]
 
         total_lin = sum(partial_lin_terms)
         total_quad = sum(partial_quad_terms)

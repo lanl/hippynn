@@ -88,6 +88,8 @@ Improvements:
 
 Bug Fixes:
 ----------
+- ``LocalChargeEnergy`` used its linear layers for the quadratic term; it now uses ``layers_quad``.
+- ``ChEQNode`` warned about periodic boundaries when none were present, and not when they were.
 - Fixed dtype bug in ``OneHotSpecies`` species indexing.
 - Fixed ``Database`` split-mask comparison (tensor cast, ``.any()`` instead of
   ``.all()``) and a ``torch.sum`` reduction bug when trimming outliers on
