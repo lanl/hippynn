@@ -138,7 +138,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.metric_tracker</span><span class="w"> </span><span class="kn">import</span> <span class="n">MetricTracker</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.step_functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_step_function</span><span class="p">,</span> <span class="n">StandardStep</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">print_lr</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">serialization</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.checkpoints</span><span class="w"> </span><span class="kn">import</span> <span class="n">DEFAULT_STRUCTURE_FNAME</span>
 
 
 <div class="viewcode-block" id="HippynnLightningModule">
@@ -155,7 +155,7 @@
         <span class="n">eval_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">stopping_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">optimizer_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Optimizer</span><span class="p">],</span>
-        <span class="n">scheduler_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">lr_scheduler</span><span class="p">],</span>
+        <span class="n">scheduler_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">lr_scheduler</span><span class="o">.</span><span class="n">LRScheduler</span><span class="p">],</span>
         <span class="n">controller</span><span class="p">:</span> <span class="n">Controller</span><span class="p">,</span>
         <span class="n">metric_tracker</span><span class="p">:</span> <span class="n">MetricTracker</span><span class="p">,</span>
         <span class="n">inputs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
@@ -295,7 +295,7 @@
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure_file</span><span class="p">:</span>
             <span class="c1"># Perform change on all ranks.</span>
-            <span class="n">sf</span> <span class="o">=</span> <span class="n">serialization</span><span class="o">.</span><span class="n">DEFAULT_STRUCTURE_FNAME</span>
+            <span class="n">sf</span> <span class="o">=</span> <span class="n">DEFAULT_STRUCTURE_FNAME</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">structure_file</span> <span class="o">=</span> <span class="n">sf</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_rank</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure_file</span><span class="p">:</span>
@@ -344,7 +344,7 @@
             <span class="c1"># and that experiment file is stored at &lt;model_name&gt;/version_&lt;n&gt;/experiment_structure.pt</span>
             <span class="n">structure_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">checkpoint_path</span><span class="p">)</span>
             <span class="n">structure_file</span> <span class="o">=</span> <span class="n">structure_file</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span>
-            <span class="n">structure_file</span> <span class="o">=</span> <span class="n">structure_file</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">serialization</span><span class="o">.</span><span class="n">DEFAULT_STRUCTURE_FNAME</span><span class="p">)</span>
+            <span class="n">structure_file</span> <span class="o">=</span> <span class="n">structure_file</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">DEFAULT_STRUCTURE_FNAME</span><span class="p">)</span>
 
         <span class="n">structure_args</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">structure_file</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="n">weights_only</span><span class="p">)</span>
 
@@ -477,7 +477,7 @@
         <span class="n">all_losses</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_loss</span><span class="p">(</span><span class="o">*</span><span class="n">all_predictions</span><span class="p">,</span> <span class="o">*</span><span class="n">all_targets</span><span class="p">)]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">eval_step_outputs</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>  <span class="c1"># free memory</span>
 
-        <span class="n">loss_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eval_names</span><span class="p">,</span> <span class="n">all_losses</span><span class="p">)}</span>
+        <span class="n">loss_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eval_names</span><span class="p">,</span> <span class="n">all_losses</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)}</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">log_dict</span><span class="p">({</span><span class="n">prefix</span> <span class="o">+</span> <span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">loss_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()},</span> <span class="n">sync_dist</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
