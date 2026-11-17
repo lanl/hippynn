@@ -113,8 +113,6 @@ def adds_to_forms(fn):
     @functools.wraps(fn)
     def inner(self, *args, **kwargs):
         form = fn(self, *args, **kwargs)
-        if self.matches is NotImplemented:
-            self.matches = ()  # empty tuple
         self.matches = *self.matches, form
 
     return inner
@@ -128,7 +126,7 @@ class ParentExpander:
 
     def __init__(self):
         # Matches is a tuple of tuples of (form, matching function)
-        self.matches = NotImplemented
+        self.matches = ()
 
     def __iter__(self):
         return iter(self.matches)
@@ -137,8 +135,6 @@ class ParentExpander:
         """Decorator: the applied function will be a generic FormTransformer"""
 
         def inner(matchfn):
-            if self.matches is NotImplemented:
-                self.matches = ()  # empty tuple
             self.matches = *self.matches, FormTransformer(form, matchfn)
             return matchfn
 
@@ -242,8 +238,7 @@ class ParentExpander:
 
         if len(base_matches):
             # Filter only to contain the earliest copy of each form.
-            if self.matches is not NotImplemented:
-                base_matches = *base_matches, *self.matches
+            base_matches = *base_matches, *self.matches
             base_form_set = set()
             base_match_list = []
             for match in base_matches:
@@ -501,8 +496,8 @@ class ExpandParents(metaclass=ExpandParentMeta):
         #  by a derived class.
         cls.parent_expander._merge(*cls.__mro__)
 
-        # If no documentation, do not apply any decorating to the documentation
-        if cls.__doc__:
+        # If no documentation or no expansion forms, do not apply any decorating to the documentation
+        if cls.__doc__ and cls.parent_expander.matches:
             cls.__doc__ = _append_docs(cls)
 
     def __getattr__(self, item):

@@ -16,7 +16,7 @@ import os
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 
-from hippynn.experiment.serialization import load_checkpoint_from_cwd
+from hippynn.experiment.checkpoints import load_checkpoint_from_active_directory
 from hippynn.tools import active_directory
 from hippynn.graphs.predictor import Predictor
 
@@ -27,7 +27,7 @@ if not os.path.exists(model_dir):
 
 # RELOAD CHECKPOINT
 with active_directory(model_dir, chdir=True):  # restart_db=True: stored dataset path is relative to the model dir
-    check = load_checkpoint_from_cwd(model_device='cpu', restart_db=True) 
+    check = load_checkpoint_from_active_directory(model_device='cpu', restart_db=True) 
     # alternatively, one can use 'restart_db=False' and manually load a different database with the same db_name for each input variable
 
 # EXTRACT MODEL AND DATABASE

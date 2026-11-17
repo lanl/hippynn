@@ -25,7 +25,7 @@ import torch
 
 import hippynn
 from hippynn.tools import active_directory
-from hippynn.experiment.serialization import load_checkpoint_from_cwd
+from hippynn.experiment.checkpoints import load_checkpoint_from_active_directory
 import hippynn.graphs
 hippynn.settings.WARN_LOW_DISTANCES = False
 
@@ -44,7 +44,7 @@ def main(args):
     
     try:
         with active_directory(args.model_loc, create=False):
-            bundle = load_checkpoint_from_cwd(map_location="cpu", restore_db=False)  
+            bundle = load_checkpoint_from_active_directory(map_location="cpu", restore_db=False)  
     except FileNotFoundError:
         raise FileNotFoundError("Model not found!")
     

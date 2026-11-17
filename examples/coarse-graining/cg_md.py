@@ -5,7 +5,7 @@ import torch
 
 from ase import units
 
-from hippynn.experiment.serialization import load_checkpoint_from_cwd
+from hippynn.experiment.checkpoints import load_checkpoint_from_active_directory
 from hippynn.graphs.predictor import Predictor
 from hippynn.molecular_dynamics.md import (
     Variable,
@@ -80,7 +80,7 @@ species_variable = Variable(
 
 # Load model
 with active_directory("model"):
-    check = load_checkpoint_from_cwd(model_device=device, restart_db=False)
+    check = load_checkpoint_from_active_directory(model_device=device, restart_db=False)
 
 repulse = check["training_modules"].model.unique_node_from_name("repulse")
 energy = check["training_modules"].model.unique_node_from_name("sys_energy")

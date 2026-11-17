@@ -24,7 +24,7 @@ from hippynn.graphs import physics
 from hippynn.graphs.gops import swap_pairfinders
 from hippynn.graphs.predictor import Predictor
 from hippynn.graphs.nodes.pairs import KDTreePairsMemory
-from hippynn.experiment.serialization import load_checkpoint_from_cwd
+from hippynn.experiment.checkpoints import load_checkpoint_from_active_directory
 from hippynn.tools import active_directory
 from hippynn.molecular_dynamics.md import (
     Variable,
@@ -44,7 +44,7 @@ else:
 # Load the pre-trained model
 try:
     with active_directory("TEST_ALUMINUM_MODEL", create=False):
-        bundle = load_checkpoint_from_cwd(map_location="cpu")
+        bundle = load_checkpoint_from_active_directory(map_location="cpu")
 except FileNotFoundError:
     raise FileNotFoundError("Model not found, run ani_aluminum_example.py first!")
 

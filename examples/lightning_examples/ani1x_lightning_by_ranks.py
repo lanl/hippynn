@@ -145,7 +145,7 @@ def load_db(db_info, en_name, force_name, seed, anidata_location, n_workers, use
 
 
 def load_split(rank):
-    from hippynn.experiment.serialization import restore_checkpoint
+    from hippynn.experiment.checkpoints import restore_checkpoint
 
     with hippynn.active_directory("./data_ani1x_split", create=False, chdir=True):  # restarters hold paths relative to this dir
 

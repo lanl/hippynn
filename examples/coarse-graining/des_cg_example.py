@@ -40,7 +40,7 @@ from hippynn.databases import Database
 from hippynn.experiment import SetupParams, setup_and_train
 from hippynn.experiment.assembly import assemble_for_training
 from hippynn.experiment.controllers import RaiseBatchSizeOnPlateau, PatienceController
-from hippynn.experiment.serialization import load_checkpoint_from_cwd
+from hippynn.experiment.checkpoints import load_checkpoint_from_active_directory
 from hippynn.graphs import IdxType
 from hippynn.graphs.nodes import loss
 from hippynn.graphs.nodes.indexers import acquire_encoding_padding, SpeciesIndexer
@@ -356,7 +356,7 @@ if run_md:
             )
 
             ## Load model
-            check = load_checkpoint_from_cwd(model_device=device, restart_db=False)
+            check = load_checkpoint_from_active_directory(model_device=device, restart_db=False)
             model = Predictor.from_graph(check["training_modules"].model)
             model.to(torch.float32)
             model.to(device)

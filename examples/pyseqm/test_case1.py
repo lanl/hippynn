@@ -256,11 +256,11 @@ with hippynn.tools.log_terminal("training_log_tag_%d.txt" % TAG, "wt"):  # and t
             training_modules=training_modules, setup_params=experiment_params
         )
     if TAG > 0:
-        from hippynn.experiment.serialization import load_checkpoint_from_cwd, load_checkpoint
+        from hippynn.experiment.checkpoints import load_checkpoint_from_active_directory, load_checkpoint
         from hippynn.experiment import train_model
 
         # load best model
-        # structure = load_checkpoint_from_cwd()
+        # structure = load_checkpoint_from_active_directory()
         # load last model
         structure = load_checkpoint("experiment_structure.pt", "last_checkpoint.pt")
         training_modules = structure["training_modules"]

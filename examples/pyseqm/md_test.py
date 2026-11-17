@@ -43,7 +43,7 @@ coordinates = torch.tensor(
 const = Constants().to(device)
 # may need to add scaling factor for length and energy on const, check constants.py
 
-from hippynn.experiment.serialization import load_checkpoint
+from hippynn.experiment.checkpoints import load_checkpoint
 
 model = load_checkpoint(model_file, state_file)["training_modules"][0].to(device)
 

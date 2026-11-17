@@ -15,7 +15,7 @@ import hippynn
 
 ### Load the model
 with hippynn.tools.active_directory("./TEST_ALUMINUM_MODEL", create=False):
-    model = hippynn.experiment.serialization.load_model_from_cwd(map_location=device)
+    model = hippynn.experiment.checkpoints.load_model_from_active_directory(map_location=device)
 
 network_node = model.node_from_name("HIPNN")  # This name was defined in the training script
 
