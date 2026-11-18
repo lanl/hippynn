@@ -156,3 +156,12 @@ class LossTrueNode(LossInputNode):
     def main_output(self):
         return self._main_output
     
+
+def __getattr__(name: str):
+    if name == "ValueNode":
+        from ...._deprecations import warn_name_change
+        from .value import ValueNode
+        warn_name_change(name, ValueNode, old_module=__name__, new_module=ValueNode.__module__, stacklevel=2)
+        return ValueNode
+    
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

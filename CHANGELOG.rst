@@ -120,6 +120,7 @@ Bug Fixes:
   between calls, raising an error for files without velocities or forces, and
   silently ignoring non-orthorhombic cell angles (now a ``ValueError``).
 - Fix pair-list reuse check in ``PairMemory`` to use per-atom displacement.
+- Fix loading of models with old  ``ValueNode`` location with deprecation.
 
 
 0.1.0
