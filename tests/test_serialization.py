@@ -543,11 +543,11 @@ def test_multioutput_roundtrip(written_energy_graph, energy_graph, example_box):
 @ignore_weights_only_warning
 @ignore_cusp_warning
 @skip_if_no_models
-def test_load_old():
+@pytest.mark.parametrize("location", ["./quad0_b512_int1_p5_GPU0_seed363144", "./HIPNN-poly-safe-DFT-20-1-c"])
+def test_load_old(location):
     from hippynn.tools import active_directory
     from hippynn.experiment import load_checkpoint_from_active_directory
 
-    location = "./quad0_b512_int1_p5_GPU0_seed363144"
     with active_directory(MODEL_DIR / location, create=False):
         check = load_checkpoint_from_active_directory(map_location="cpu")
 
