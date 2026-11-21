@@ -667,6 +667,60 @@ def test_load_database_custom_keys(temporary_directory) -> None:
     assert db.arr_dict["custom_energy"].shape == (2,)
 
 
+@pytest.mark.parametrize("per_conformer_species", [False, True], ids=["ani1x_style", "ani2x_style"])
+def test_pyani_species_layouts(per_conformer_species, temporary_directory) -> None:
+    """PyAniFileDB reads species stored once per group (1D, ANI-1x style) or once per conformer (2D, ANI-2x style)."""
+    import numpy as np
+
+    h5py = pytest.importorskip("h5py")
+    from hippynn.databases.h5_pyanitools import PyAniFileDB
+
+    rng = np.random.default_rng(0)
+    if per_conformer_species:
+        # Groups by number of atoms, with composition varying between conformers.
+        groups = {
+            "007": np.array([[1, 1, 1, 1, 6, 6, 8], [1, 1, 1, 6, 6, 7, 8], [1, 1, 6, 6, 8, 8, 9]]),
+            "009": np.array([[1, 1, 1, 1, 1, 1, 6, 6, 16], [1, 1, 1, 1, 6, 6, 6, 8, 17]]),
+        }
+    else:
+        # Groups by formula, with species shared by all conformers.
+        groups = {
+            "C2H4O1": np.repeat([[1, 1, 1, 1, 6, 6, 8]], 3, axis=0),
+            "C3H6": np.repeat([[1, 1, 1, 1, 1, 1, 6, 6, 6]], 2, axis=0),
+        }
+
+    h5_path = Path(temporary_directory) / "species_layout.h5"
+    expected = {"species": [], "coordinates": [], "energies": []}
+    with h5py.File(h5_path, "w") as f:
+        for name, species in groups.items():
+            n_conf, n_atoms = species.shape
+            coordinates = rng.normal(size=(n_conf, n_atoms, 3))
+            energies = rng.normal(size=n_conf)
+            g = f.create_group(name)
+            g.create_dataset("species", data=species if per_conformer_species else species[0])
+            g.create_dataset("coordinates", data=coordinates)
+            g.create_dataset("energies", data=energies)
+
+            pad = 9 - n_atoms
+            expected["species"].append(np.pad(species, ((0, 0), (0, pad))))
+            expected["coordinates"].append(np.pad(coordinates, ((0, 0), (0, pad), (0, 0))))
+            expected["energies"].append(energies)
+    expected = {k: np.concatenate(v) for k, v in expected.items()}
+
+    db = PyAniFileDB(
+        file=str(h5_path),
+        inputs=["species", "coordinates"],
+        targets=["energies"],
+        seed=0,
+        num_workers=0,
+        quiet=True,
+    )
+
+    assert db.arr_dict["species"].shape == (5, 9)
+    for k, v in expected.items():
+        np.testing.assert_allclose(db.arr_dict[k].numpy(), v, rtol=1e-6)
+
+
 _QM9_DATASET = Path(__file__).resolve().parents[2] / "datasets" / "new_qm9_clean.npz"
 skip_if_no_qm9 = pytest.mark.skipif(not _QM9_DATASET.exists(), reason="qm9 dataset resource not found")
 

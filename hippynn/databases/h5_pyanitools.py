@@ -66,8 +66,11 @@ class PyAniMethods:
 
                 # Special logic for species
                 if k == species_key:
-                    # Groups have the same species, broadcast out the batch axis
-                    v = np.expand_dims(v, 0)
+                    # Species may be given once per group (1D, e.g. ANI-1x grouped by formula)
+                    # or once per conformer (2D, e.g. ANI-2x grouped by number of atoms).
+                    # In the 1D case, add a batch axis to be broadcast out later.
+                    if v.ndim == 1:
+                        v = np.expand_dims(v, 0)
                     # If given as strings, map to atomic elements
                     if (not isinstance(v.dtype, type)) and issubclass(v.dtype.type, np.str_):
                         v = numpy_map_elements(v)
@@ -157,8 +160,8 @@ class PyAniMethods:
 
             for k, arr in b.items():
 
-                if k == species_key:
-                    # ANI datasets come with one set of conformations per batch, each has the same elements.
+                if k == species_key and arr.shape[0] != n_sys:
+                    # Some ANI datasets come with one set of species per batch, shared by every conformation.
                     # here we repeat that information for each conformation.
                     arr = np.repeat(arr, n_sys, axis=0)
 
