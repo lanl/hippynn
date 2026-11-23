@@ -96,11 +96,17 @@ for liquid, temperature, mapping, model in systems:
     )
     
     results = {
-        "g_ions_ions_nm3": g11, "g_ions_donor_nm3": g12, "g_donor_donor_nm3": g22,
-        "kappa_gpa-1": kappa, "gamma": gamma,
-        "v_grouped_ions_cm3_mol": v_ions, "v_donor_cm3_mol": v_donor,
-        "mu_derivative_ions": mu_ions, "mu_derivative_donor": mu_donor,
+        "g_ions_ions_nm3": g11,  # Ion-component self KBI e.g., choline-choline
+        "g_ions_donor_nm3": g12,  # Ion component--donor KBI e.g., choline-urea
+        "g_donor_donor_nm3": g22,  # Donor self KBI e.g., urea-urea
+        "kappa_gpa-1": kappa,  # Isothermal compressibility
+        "gamma": gamma,  # Thermodynamic factor
+        "v_grouped_ions_cm3_mol": v_ions,  # Ionic-component partial molar volume
+        "v_donor_cm3_mol": v_donor,  # Donor partial molar volume.
+        "mu_derivative_ions": mu_ions,  # Chemical potential derivative of ions
+        "mu_derivative_donor": mu_donor,  # Chemical potential derivative of donor
     }
+    
     thermo_file = input_file.with_name(f"{input_file.stem}_thermodynamics.csv")
     with thermo_file.open("w", newline="") as file:
         writer = csv.DictWriter(file, fieldnames=results)
