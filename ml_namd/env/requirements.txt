@@ -1,0 +1,31 @@
+# ml_namd key pinned dependencies (training, genA, ML-TSH, harvest, analysis).
+#
+# IMPORTANT ordering (see ../docs/installation_and_environment.md):
+#   1) create a clean Python 3.13.5 environment,
+#   2) install the CUDA 11.8 PyTorch wheel FIRST (NOT listed here, to avoid a CPU-wheel downgrade):
+#        pip install torch==2.7.1+cu118 --index-url https://download.pytorch.org/whl/cu118
+#   3) pip install -r requirements.txt   (this file),
+#   4) install HIPPYNN and PySEQM editable at their pinned commits (see the install guide).
+#
+# Versions below are the pins the pipeline was validated with. HIPPYNN (commit d260cd5) and
+# PySEQM (commit e273f6d) are installed editable from source, not from PyPI.
+
+numpy==2.2.6
+scipy==1.16.0
+h5py==3.14.0
+ase==3.25.0
+matplotlib==3.10.3
+scikit-learn==1.7.2
+numba==0.61.2
+pandas==2.3.2
+tqdm==4.67.1
+PyYAML==6.0.3
+graphviz==0.21
+lightning==2.6.0
+pytorch-lightning==2.6.0
+torchmetrics==1.8.2
+
+# Optional -- only needed for hyperparameter optimization:
+# ax-platform==1.1.2
+# botorch==0.15.1
+# gpytorch==1.14

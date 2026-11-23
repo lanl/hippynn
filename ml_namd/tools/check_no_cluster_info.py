@@ -32,7 +32,7 @@ LEAK_PATTERNS = [
     r"\bbridges-?2?\b", r"\bredstone\b",
     r"\bml4chem\b", r"\bcint\b",                    # unix group / allocation names
     r"venv_master", r"mlip_md_dyn", r"hiphopnn_env",  # named environments
-    r"[A-Za-z]:\\",                                 # windows drive paths, e.g. D:\...
+    r"\b[A-Za-z]:[\\/]",                            # windows/local drive paths, e.g. D:\ or D:/  (not http://)
     r"\blanl\.gov\b",                               # institutional host names
 ]
 # SCHEDULER tokens are a leak in normal files, but ALLOWED inside optional_hpc/, which
