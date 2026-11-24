@@ -71,7 +71,7 @@ Examples
   # E+F only (GDV inputs pruned away)
   python multistate_ef_nacr_inference_hiphop.py ... --no-nacr
 
-Developer: Ajay Khanna <akhanna2@ucmerced.edu>
+Developer: Ajay Khanna
 LANL / Triad National Security, LLC.  LA-UR-XX-XXXXX
 """
 

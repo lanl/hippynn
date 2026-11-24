@@ -47,7 +47,7 @@ Example (per-step, self-consistent GDV -- the FSSH use case)
     #   out["F"][3]         force on S3                 (nframes, 15, 3)
     #   out["dENACR"]["13"] scaled NACR S1-S3           (nframes, 45)
 
-Developer: Ajay Khanna <akhanna2@ucmerced.edu>
+Developer: Ajay Khanna
 LANL / Triad National Security, LLC.  LA-UR-XX-XXXXX
 """
 

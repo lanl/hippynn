@@ -43,7 +43,7 @@ Examples
 
   python multistate_ef_inference_hiphop.py -i ef.input --no-forces
 
-Developer: Ajay Khanna <akhanna2@ucmerced.edu>
+Developer: Ajay Khanna
 LANL / Triad National Security, LLC.  LA-UR-XX-XXXXX
 """
 

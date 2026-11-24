@@ -20,7 +20,7 @@ HiphopPredictor -- gap_source is ignored and no GAP graph is built.
 Everything else (GDV file/forces, energy/force/dENACR outputs, conventions) is
 inherited verbatim from the v2 design; see hiphop_predictor.py.
 
-Developer: Ajay Khanna <akhanna2@ucmerced.edu>
+Developer: Ajay Khanna
 LANL / Triad National Security, LLC.
 """
 
