@@ -67,6 +67,13 @@ SELF = os.path.realpath(__file__)
 
 
 def iter_text_files(root):
+    # The project's landing README lives at the repo root (one level above ml_namd/), OUTSIDE `root`.
+    # Include it so the repo's front page is scrubbed too -- it is project-owned, not upstream HIPPYNN.
+    # (Its omission once let machine-specific content survive on the landing page.)
+    if os.path.basename(os.path.normpath(root)) == "ml_namd":
+        repo_readme = os.path.join(os.path.dirname(os.path.normpath(root)), "README.md")
+        if os.path.isfile(repo_readme):
+            yield repo_readme
     for dirpath, dirnames, filenames in os.walk(root):
         dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS]
         for name in filenames:
