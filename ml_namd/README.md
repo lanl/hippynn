@@ -53,3 +53,7 @@ earlier fork. These are third-party-style reference notes about HIPPYNN, not pro
 ## Status
 The canonical pipeline is staged, refactored behavior-preservingly, documented, and made
 environment-independent. Nothing under the upstream HIPPYNN tree is modified.
+
+## Contributing & citation
+See `CONTRIBUTING.md` for conventions (run `tools/check_no_cluster_info.py` before committing) and
+`CITATION.cff` for how to cite this work.
