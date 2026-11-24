@@ -18,7 +18,7 @@ neither touches GDV. `GraphModule.__init__` itself raises if an output needed an
 unspecified input, so the prune is self-validating.
 
 Pruning is required ONLY for MD. The Phase-1 held-out validation deliberately ran
-the FULL unpruned graph and passed (Darwin job 17116275: all 22 quantities at
+the FULL unpruned graph and passed (a held-out validation run: all 22 quantities at
 0.98-1.02x the trial's test MAE).
 
 OTHER DEPARTURES FROM THE STOCK SCRIPT
@@ -76,10 +76,10 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 # `direct_nacr_head_v2` must be importable as a TOP-LEVEL module before torch.load
 # unpickles experiment_structure.pt (the pickle references it by module path).
 sys.path.insert(0, str(REPO_ROOT / "scripts" / "train"))
-# Chicoma: repo scripts/train lives on /users even when this driver runs from /lustre.
-_CHICOMA_TRAIN = "/users/akhanna2/data/ml_namd_project/scripts/train"
-if os.path.isdir(_CHICOMA_TRAIN):
-    sys.path.insert(0, _CHICOMA_TRAIN)
+# the cluster: repo scripts/train lives on /users even when this driver runs from <SCRATCH>.
+_TRAIN_DIR = "<ML_NAMD_ROOT>/scripts/train"
+if os.path.isdir(_TRAIN_DIR):
+    sys.path.insert(0, _TRAIN_DIR)
 import direct_nacr_head_v2  # noqa: F401,E402
 # Models trained by the current unified_training.py (run as __main__) pickle a
 # reference to __main__.DataDumper; inject unified_training's symbols into __main__

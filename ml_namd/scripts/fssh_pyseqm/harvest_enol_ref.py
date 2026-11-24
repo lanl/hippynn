@@ -6,7 +6,7 @@ CONVENTIONS (verified against init state, memory fssh-pyseqm-no-decoherence-over
   * active_surface is S0-indexed (0=S0). CLASSICAL pop = fraction of traj on each surface.
   * electronic_amplitudes has width W = n_excited; column j maps to EXCITED state S(j+1).
     No S0 amplitude is stored, so quantum S0 pop = 1 - sum_j |c_j|^2 (over-coherence deficit).
-Writes a compact npz + prints a sanity summary. Data stays on Darwin.
+Writes a compact npz + prints a sanity summary. Data stays on the cluster.
 
 Inputs (positional argv): the base dir holding ``enol_init3/`` and ``enol_init5/`` h5 subdirs.
 Output: ``<base>/enol_ref_pops.npz`` (per-init time axis + classical/quantum populations).

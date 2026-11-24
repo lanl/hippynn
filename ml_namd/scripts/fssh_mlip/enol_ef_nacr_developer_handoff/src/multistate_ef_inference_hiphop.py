@@ -32,18 +32,18 @@ does not accumulate.
 
 Provenance: enol AcAc, HPO job 41970606, trial f310c8da (n_features=193,
 n_sensitivities=29, lr=2.9626e-4, seed 114514). Validated on 5000 held-out
-frames (Darwin job 17116275): all quantities at 0.98-1.02x the trial's test MAE.
+frames (a held-out validation run): all quantities at 0.98-1.02x the trial's test MAE.
 
 Examples
 --------
   python multistate_ef_inference_hiphop.py \
-      --model-dir /vast/home/akhanna2/data/models/enol_ef_nacr_s0s5_f310c8da \
+      --model-dir <MODELS_DIR>/enol_ef_nacr_s0s5_f310c8da \
       --xyz-file geom/heldout_frame_50000.xyz \
       --states 0,1,2,3,4,5 --format both
 
   python multistate_ef_inference_hiphop.py -i ef.input --no-forces
 
-Developer: Ajay Khanna <akhanna2@ucmerced.edu>
+Developer: Ajay Khanna
 LANL / Triad National Security, LLC.  LA-UR-XX-XXXXX
 """
 

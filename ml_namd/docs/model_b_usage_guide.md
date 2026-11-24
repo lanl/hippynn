@@ -9,8 +9,8 @@ scaled-NACR target turned on. At inference it is paired with a frozen Model A (e
 composed A→B stack driven by the FSSH engine in `../scripts/fssh_mlip/`.
 
 Placeholders: `<TRAIN>` = `../scripts/training`, `<DATA>` = a Model-B dataset directory, `<OUT>` = the
-output model directory, `$PY` = the project Python (see `../env/README.md`; on Chicoma this is
-`venv_master`). Replace machine paths with your own.
+output model directory, `$PY` = the project Python (see `../env/README.md`). Replace machine paths with
+your own.
 
 ---
 
@@ -36,10 +36,12 @@ model (pairs `12, 13, 23`) the required arrays are:
 | `acn_GDV12`, `acn_GDV13`, `acn_GDV23` | **inputs** (`F_i − F_j`, flattened) | `(N, 45)` | float32 |
 | `acn_GAP12`, `acn_GAP13`, `acn_GAP23` | **inputs** (`E_j − E_i`) [eV] | `(N,)` | float64 |
 
-Building the pool from extracted E/F/dENACR is done by `../scripts/data_generation/build_bg_pool_enol.py`
-(enol) — it copies R/Z/sE/F/dENACR into a `pool_s0s3/` dir and derives `GDV{ij}=F_i-F_j` and
-`GAP{ij}=sE_j-sE_i`. The frame ordering of every array must match (same rows), or GDV/GAP will be
-misaligned with the target.
+The dENACR **target** and the context arrays come from the reference-labeled pool (built by
+`../scripts/data_generation/build_bg_pool_enol.py`). The GDV/GAP **inputs** for the deployed decoupled
+Model B are the **A-predicted** values written by the genA step
+(`../scripts/data_generation/gen_modelA_inputs.py`): it runs the frozen Model A over the pool and writes
+`acn_GDV{ij}=F_i-F_j` and `acn_GAP{ij}=sE_j-sE_i` from Model A's predictions. The frame ordering of every
+array must match (same rows), or the inputs will be misaligned with the target.
 
 ## 3. Training a Model B
 
@@ -101,8 +103,11 @@ Key points:
 - `scaled_nacr_head = direct_vector_v3` selects the gap-aware head (`direct_nacr_head_v3.py`);
   `direct_nacr_v2_mode = gdv_pair_mixing_residual` is the production assembly mode.
 - `gdv_source = file` reads GDV/GAP from disk via the two templates (`{prefix}` = `acn_`,
-  `{pair}` = `12`/`13`/`23`). At training these are the reference GDV/GAP; at inference Model A supplies
-  them (Section 5).
+  `{pair}` = `12`/`13`/`23`). For the deployed decoupled Model B these on-disk inputs are the
+  **A-predicted** GDV/GAP written by the genA step (`../scripts/data_generation/gen_modelA_inputs.py`),
+  **not** the reference/oracle values -- so training matches inference, where frozen Model A supplies them
+  (Section 5). Keep the A-predicted arrays in a directory with no reference GDV/GAP copies, or the loader
+  will silently read the reference values.
 - `targeted_scaled_nacr_pairs = 12 13 23` restricts the head to the S0–S3 excited pairs (S0 does not
   couple). The order defines the pair order everywhere downstream.
 - The head's gap gate is zero-initialized, so the model starts equal to the gapless v2 and learns the
@@ -155,8 +160,8 @@ $PY <fssh_mlip>/namd_composed_batch.py \
     --output-dir out --output-prefix run
 ```
 
-`--count` chunks the initial-condition set (125 is the OOM-safe maximum on a 40 GB A100); a SLURM array
-or the dynamic GPU queue in `../scripts/slurm/keto_mlip_prod.slurm` fans chunks across GPUs.
+`--count` chunks the initial-condition set (125 is the OOM-safe maximum on a 40 GB GPU); a multi-GPU
+chunk-packing loop (see `../optional_hpc/` for a scheduler template) fans chunks across GPUs.
 
 ## 6. Loading a trained Model B (unpickle contract)
 
@@ -188,7 +193,7 @@ modules the graph references must be importable **before** `torch.load`:
 1. Environment: `python ../env/verify_env.py`.
 2. Training smoke: a 2-epoch run of the `.inp` above with `max_epochs = 2` on a small `data_dir` — it
    should build the graph, print the per-pair loss tag, and write a `training_summary.json`.
-3. Inference smoke: `../scripts/slurm/keto_s0s3_jointB_smoke.slurm` (5 ICs, 500 steps) — a pass is a
+3. Inference smoke: run the composed batch runner with a small `--count` (5 ICs, 500 steps) -- a pass is a
    clean model load, a written h5, hops firing, and zero amplitude NaN.
 
 See also: `model_a_guide.md` (the E+F model that feeds GDV/GAP), `fssh_mlip_guide.md` (the driver), and

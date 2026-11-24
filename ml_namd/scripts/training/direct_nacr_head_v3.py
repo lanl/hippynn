@@ -64,10 +64,12 @@ from hippynn.layers import targets as target_modules  # type: ignore[import]
 #   gdv_local_gate           : per-atom learned gate applied directly to the atom's GDV
 #   gdv_pair_mixing          : edge (pair) coefficients mix GDV differences between atoms
 #   gdv_pair_mixing_residual : gdv_pair_mixing PLUS a geometry (pair-coordinate) residual term
+#   geom_residual_only       : the geometry (pair-coordinate) residual term ALONE, no GDV mixing
 V3_MODES: Tuple[str, ...] = (
     "gdv_local_gate",
     "gdv_pair_mixing",
     "gdv_pair_mixing_residual",
+    "geom_residual_only",
 )
 
 
@@ -151,7 +153,7 @@ class DirectScaledNACRV3Layer(torch.nn.Module):
         # Which sub-terms this mode activates.
         self.uses_local_gate = self.mode == "gdv_local_gate"
         self.uses_gdv_mixing = self.mode in ("gdv_pair_mixing", "gdv_pair_mixing_residual")
-        self.uses_geom_residual = self.mode == "gdv_pair_mixing_residual"
+        self.uses_geom_residual = self.mode in ("gdv_pair_mixing_residual", "geom_residual_only")
 
         # Per-atom gate MLP (gdv_local_gate mode only).
         if self.uses_local_gate:

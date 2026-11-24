@@ -20,7 +20,7 @@ __project__ = "ml_namd"
 
 import os
 
-EXP = "/lustre/scratch5/akhanna2/ml_namd_project/experiments"
+EXP = "<ML_NAMD_ROOT>/experiments"
 ND = f"{EXP}/nve_md"
 GEOM = f"{ND}/geom"
 OUTPUTS = f"{ND}/prod"

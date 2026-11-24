@@ -21,7 +21,7 @@ un-scale, so a caller can compute NACT = (d_ij . V).
 For the JOINT control there is no composition -- use HiphopPredictorV3 directly
 with gap_source="self".
 
-Developer: Ajay Khanna <akhanna2@ucmerced.edu>
+Developer: Ajay Khanna
 LANL / Triad National Security, LLC.
 """
 from __future__ import annotations

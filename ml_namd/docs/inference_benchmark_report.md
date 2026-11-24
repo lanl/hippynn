@@ -45,10 +45,9 @@ Speed across a multi-GPU node comes from **packing independent chunks**, not fro
 - Chunk packing (fanning `--start`/`--count` slices across the node's GPUs) gives ~3.7× on 4 GPUs.
 - Data-parallel splitting of a single batch (DDP-style) gives only ~1.21×.
 
-The FSSH@MLIP production launcher (`../scripts/slurm/keto_mlip_prod.slurm`) therefore uses a **dynamic
-FIFO work-queue**: each GPU (addressed by UUID) pulls the next chunk when it finishes, so heterogeneous
-chunk runtimes do not strand a fast GPU waiting on a slow one. Prefer this over static round-robin
-assignment.
+A multi-GPU run packs chunks across the node's GPUs with a **dynamic work-queue**: each GPU pulls the next
+chunk when it finishes, so heterogeneous chunk runtimes do not strand a fast GPU waiting on a slow one.
+Prefer this over static round-robin assignment (see `../optional_hpc/` for a scheduler template).
 
 ## 4. FSSH@PYSEQM reference cost (for context)
 
@@ -74,9 +73,9 @@ surrogate.
 ## 6. How to reproduce
 
 Model A throughput: time a fixed batch of geometries through the pruned `[Z,R]→[sE_k,F_k]` graph with
-and without the force output. FSSH batching: submit `../scripts/slurm/keto_mlip_smoke.slurm` at
-increasing `COUNT` and read peak memory from the logs; the OOM boundary is the ceiling. Multi-GPU:
+and without the force output. FSSH batching: run `../examples/<tautomer>/04_run_ml_tsh.py` at increasing
+`--count` and read peak memory from the logs; the OOM boundary is the ceiling. Multi-GPU:
 compare wall time for the same total ICs run as one big chunk vs packed chunks under the dynamic queue.
 
 See also: `validation_report.md` (accuracy), `fssh_mlip_guide.md` (the driver + batching), and
-`slurm_job_guide.md` (submission).
+`slurm_job_guide.md` (running the pipeline).

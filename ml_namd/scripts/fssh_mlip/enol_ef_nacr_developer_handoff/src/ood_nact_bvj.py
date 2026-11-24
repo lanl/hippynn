@@ -17,8 +17,8 @@ import os, sys, glob, argparse
 os.environ["HIPPYNN_USE_CUSTOM_KERNELS"] = "False"
 import numpy as np, torch, h5py
 torch.set_default_dtype(torch.float64)
-TRAIN = "/users/akhanna2/data/ml_namd_project/scripts/train"
-HSRC = "/users/akhanna2/data/ml_namd_project/fssh_mlip/HANDOFF/src"
+TRAIN = "<ML_NAMD_ROOT>/scripts/train"
+HSRC = "<ML_NAMD_ROOT>/fssh_mlip/HANDOFF/src"
 sys.path.insert(0, TRAIN); sys.path.insert(0, HSRC)
 import unified_training, direct_nacr_head_v3, direct_nacr_head_v2  # noqa
 import __main__ as _M
@@ -29,7 +29,7 @@ from hiphop_predictor_v3 import HiphopPredictorV3
 from modelb_composed_predictor import ModelBComposedPredictor
 
 STATES = [0, 1, 2, 3]; PAIRS = ["12", "13", "23"]; IDX = {"12": (0, 1), "13": (0, 2), "23": (1, 2)}
-EXP = "/lustre/scratch5/akhanna2/ml_namd_project/experiments"
+EXP = "<ML_NAMD_ROOT>/experiments"
 EXPECTED = [8, 8, 6, 6, 6, 6, 6, 1, 1, 1, 1, 1, 1, 1, 1]
 
 ap = argparse.ArgumentParser()

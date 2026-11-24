@@ -1,0 +1,38 @@
+#!/bin/bash
+# Generic, OPTIONAL Slurm template for running one ml_namd pipeline step on an HPC cluster.
+#
+# The pipeline does NOT require a scheduler: every step in ml_namd/examples/<tautomer>/
+# runs as a plain `python <step>.py ...` on any machine that has a CUDA GPU and the
+# project environment installed. This template is only a convenience for users who prefer
+# to submit a step to Slurm. Replace every <PLACEHOLDER> with your own site's values --
+# nothing here is tied to any specific cluster, account, or filesystem.
+#
+# Usage:
+#   1) edit the #SBATCH lines and the variables below for your allocation,
+#   2) set STEP to the python command you want to run,
+#   3) submit it with your scheduler's submit command.
+#
+#SBATCH --job-name=ml_namd_step
+#SBATCH --account=<YOUR_ACCOUNT>
+#SBATCH --partition=<YOUR_GPU_PARTITION>
+#SBATCH --nodes=1
+#SBATCH --gpus=1
+#SBATCH --time=<HH:MM:SS>
+#SBATCH --output=%x_%j.out
+
+set -euo pipefail
+
+# --- user settings ---------------------------------------------------------
+PYTHON="${PYTHON:-python}"                  # path to the project's python interpreter
+export HIPPYNN_USE_CUSTOM_KERNELS=False      # required for the float64 inference path
+# STEP: the pipeline step to run, for example one of:
+#   python examples/enol/02_train_model_A.py --seed 42 --device cuda
+#   python examples/enol/03_train_model_B.py --seed 42 --head hybrid --device cuda
+#   python examples/enol/04_run_ml_tsh.py    --seed 42 --head hybrid --device cuda
+STEP="${STEP:?set STEP to the python command to run}"
+# ---------------------------------------------------------------------------
+
+echo "node: $(hostname)"
+nvidia-smi -L || true
+echo "running: ${PYTHON} ${STEP}"
+${PYTHON} ${STEP}
