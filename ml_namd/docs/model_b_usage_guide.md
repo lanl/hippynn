@@ -160,8 +160,8 @@ $PY <fssh_mlip>/namd_composed_batch.py \
     --output-dir out --output-prefix run
 ```
 
-`--count` chunks the initial-condition set (125 is the OOM-safe maximum on a 40 GB A100); a SLURM array
-or the dynamic GPU queue in `../scripts/slurm/keto_mlip_prod.slurm` fans chunks across GPUs.
+`--count` chunks the initial-condition set (125 is the OOM-safe maximum on a 40 GB GPU); a multi-GPU
+chunk-packing loop (see `../optional_hpc/` for a scheduler template) fans chunks across GPUs.
 
 ## 6. Loading a trained Model B (unpickle contract)
 

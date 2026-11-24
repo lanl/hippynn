@@ -25,7 +25,7 @@ Follow-up cleanup (deferred): de-duplicate by pointing the driver's `sys.path` a
 instead of vendoring copies here, then remove the duplicated training modules from this bundle. Until
 then, treat `../../training/` as canonical and this bundle as a runtime vendoring.
 
-Provenance: `<WORK_ROOT>/keto_mlip_10ps/driver/enol_ef_nacr_developer_handoff/src/`,
+Provenance: `enol_ef_nacr_developer_handoff/src/`,
 pulled 2026-08-30 (13 .py files).
 
 Refactor status: the 9 predictor-specific modules (`hiphop_predictor`, `hiphop_predictor_v3`,
