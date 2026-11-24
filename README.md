@@ -132,16 +132,20 @@ python ml_namd/tools/check_no_cluster_info.py
 
 If you use this code, please cite the accompanying paper:
 
-> A. Khanna, T. Karella, *et al.*, "Machine Learning for Non Adiabatic Excited State Molecular
+> Ajay Khanna, Patrick J. Lohr, Vishikh Athavale, Ilkwon Cho, Tomáš Karella, Victor M. Freixas,
+> Sebastian Fernandez-Alberti, Niranjan Govind, Olexandr Isayev, Nicholas Lubbers, Marco Garavelli,
+> Shaul Mukamel, and Sergei Tretiak, "Machine Learning for Non Adiabatic Excited State Molecular
 > Dynamics," 2026 (DOI to be added on publication).
 
 and, if you use the training pools or initial conditions, the replication dataset:
 
-> A. Khanna, *Replication Data for: Machine Learning for Non Adiabatic Excited State Molecular
-> Dynamics*, Harvard Dataverse, 2026. https://doi.org/10.7910/DVN/HCL8EK
+> Ajay Khanna, Patrick J. Lohr, Vishikh Athavale, Ilkwon Cho, Tomáš Karella, Victor M. Freixas,
+> Sebastian Fernandez-Alberti, Niranjan Govind, Olexandr Isayev, Nicholas Lubbers, Marco Garavelli,
+> Shaul Mukamel, and Sergei Tretiak, *Replication Data for: Machine Learning for Non Adiabatic Excited
+> State Molecular Dynamics*, Harvard Dataverse, 2026. https://doi.org/10.7910/DVN/HCL8EK
 
-A machine-readable citation is in [`ml_namd/CITATION.cff`](ml_namd/CITATION.cff); the full author list and
-the paper DOI will be finalized there at publication.
+A machine-readable citation is in [`ml_namd/CITATION.cff`](ml_namd/CITATION.cff); the paper DOI will be
+added there at publication.
 
 ## License and copyright
 
