@@ -24,3 +24,7 @@ The data are distributed via the Harvard Dataverse record (DOI `10.7910/DVN/HCL8
 The two examples share identical step scripts; only `_common.py` differs (tautomer, initial-condition
 prefix, and dynamics length). The main result uses the **`both`** (hybrid) Model B head with a 5-seed
 ensemble; `gdv_only` and `geom_only` are the ablation heads.
+
+## Adapting to another molecule
+The pipeline is molecule-agnostic. To run it on a different system (your own `acn_` arrays + a few
+per-system settings), see [`../docs/bring_your_own_dataset.md`](../docs/bring_your_own_dataset.md).
