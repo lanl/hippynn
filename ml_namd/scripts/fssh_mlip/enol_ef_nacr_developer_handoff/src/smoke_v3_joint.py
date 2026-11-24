@@ -7,7 +7,7 @@ Proves: (1) the v3 predictor CONSTRUCTS on a gap-gated model (GAP inputs wired);
 (self-consistent gap from the joint's own energies) reproduces the oracle-gap
 result -- the JOINT OOD path.
 
-Run on Chicoma (CPU login node OK; small subset). NOT a paper result.
+Run on the cluster (CPU login node OK; small subset). NOT a paper result.
 """
 
 # Developer Information

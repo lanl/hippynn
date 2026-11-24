@@ -26,7 +26,7 @@ DESIGN
   device normalization and the final-xyz writer are IMPORTED from
   pyseqm_hippynn_md.py so optimizer and propagator stay in lockstep.
 
-PREREQ: geomeTRIC must be importable in the run env (mlip_md_dyn):
+PREREQ: geomeTRIC must be importable in the run env (the project environment):
   pip install geometric        # not yet installed as of staging
 
 INPUT: same .input files as the MD runner (reads `active_state` or `state_index`),

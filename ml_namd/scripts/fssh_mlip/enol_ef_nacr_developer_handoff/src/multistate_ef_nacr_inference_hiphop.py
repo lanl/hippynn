@@ -56,14 +56,14 @@ The NACR head allocates `n_sensitivities * n_features^2 * batch` floats PER PAIR
 gradients. chunk=200 OOMs a 40 GB A100; chunk=16 peaks at ~4.6 GiB. Default 16.
 
 Provenance: enol AcAc, HPO job 41970606, trial f310c8da. Validated on 5000
-held-out frames (Darwin job 17116275): all 22 quantities at 0.98-1.02x the
+held-out frames (a held-out validation run): all 22 quantities at 0.98-1.02x the
 trial's own test MAE, with oracle GDV.
 
 Examples
 --------
   # validated path: oracle GDV from disk, frames selected by index
   python multistate_ef_nacr_inference_hiphop.py \
-      --model-dir /vast/home/akhanna2/data/models/enol_ef_nacr_s0s5_f310c8da \
+      --model-dir <MODELS_DIR>/enol_ef_nacr_s0s5_f310c8da \
       --xyz-file geom/heldout_frame_50000.xyz \
       --gdv-source file --gdv-dir .../gdv_100k --gdv-prefix acn_ --gdv-frames 50000 \
       --format both
@@ -449,7 +449,7 @@ def main():
                           "per frame. Compare phase-lessly (one sign per frame over the 45-vector)."),
         "gdv_warning": (None if a.gdv_source == "file" else
                         "dENACR computed from PREDICTED forces: train/inference mismatch, NOT validated."),
-        "provenance": "enol AcAc, HPO 41970606, trial f310c8da; held-out validation Darwin job 17116275",
+        "provenance": "enol AcAc, HPO 41970606, trial f310c8da; held-out validation a held-out validation run",
     }
     results = {"meta": meta, "frames": []}
     for i in range(nframes):

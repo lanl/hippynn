@@ -30,10 +30,10 @@ __project__ = "ml_namd"
 
 import os
 
-EXP = "/lustre/scratch5/akhanna2/ml_namd_project/experiments"
+EXP = "<ML_NAMD_ROOT>/experiments"
 ND = f"{EXP}/nve_md"                      # /users/.../experiments is a symlink to this
 GEOM = f"{ND}/geom"
-OUTPUTS = f"{ND}/outputs"                 # /lustre outputs (large trajectories)
+OUTPUTS = f"{ND}/outputs"                 # <SCRATCH> outputs (large trajectories)
 OUT_INPUTS = f"{ND}/inputs_ms"
 
 E_OPT = {"enol": -1391.422970121047, "keto": -1391.451136550848}

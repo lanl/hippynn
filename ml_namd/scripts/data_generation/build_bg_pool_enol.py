@@ -4,7 +4,7 @@
 Copies the S0-S3 energies/forces + dENACR{12,13,23} targets from each set's ``extracted/50K`` into a
 ``pool_s0s3`` dir, then derives the Model-B inputs: GDV{ij} = F_i - F_j (excited-force difference,
 flattened to (N,45) float32) and GAP{ij} = sE_j - sE_i (float64). Prints a GAP12 near-CI summary.
-Top-level script (no main()); paths are the confirmed Chicoma data_gen locations.
+Top-level script (no main()); paths are the confirmed the cluster data_gen locations.
 """
 
 # Developer Information
@@ -15,7 +15,7 @@ __date__ = "Sep-01-2026"
 __project__ = "ml_namd"
 
 import numpy as np, os, shutil
-L="/lustre/scratch5/akhanna2/ml_namd_project/data_gen/enol_balf_galf"
+L="<ML_NAMD_ROOT>/data_gen/enol_balf_galf"
 PAIRS={"12":(1,2),"13":(1,3),"23":(2,3)}
 COPY=["acn_R","acn_Z"]+[f"acn_sE{s}" for s in range(4)]+[f"acn_F{s}" for s in range(4)]+[f"acn_dENACR{p}" for p in PAIRS]
 for t in ["BALF","GALF"]:

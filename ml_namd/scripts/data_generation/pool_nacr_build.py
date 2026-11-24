@@ -3,7 +3,7 @@
 targets + GDV{12,13,23} inputs. Same source order/slicing as pool_s0s3.py so frames align.
 
 Pools the GS (S0) + S1/S2/S3-dynamics extracted sources per tautomer, writes a source_surface provenance
-array, and derives GDV{ij} = F_i - F_j (float32, (N,45)). Top-level script; paths are the Chicoma locations.
+array, and derives GDV{ij} = F_i - F_j (float32, (N,45)). Top-level script; paths are the the cluster locations.
 """
 
 # Developer Information
@@ -14,9 +14,9 @@ __date__ = "Sep-01-2026"
 __project__ = "ml_namd"
 
 import numpy as np, os
-GS = "/users/akhanna2/data/ml_namd_project/data/{t}/50K"
-EX = "/lustre/scratch5/akhanna2/ml_namd_project/data_gen/prod/{t}_s{s}/extracted/50K"
-OUT = "/lustre/scratch5/akhanna2/ml_namd_project/data_gen/pooled/{t}_s0s3_200k_nacr"
+GS = "<ML_NAMD_ROOT>/data/{t}/50K"
+EX = "<ML_NAMD_ROOT>/data_gen/prod/{t}_s{s}/extracted/50K"
+OUT = "<ML_NAMD_ROOT>/data_gen/pooled/{t}_s0s3_200k_nacr"
 EF = ["acn_R","acn_Z","acn_sE0","acn_sE1","acn_sE2","acn_sE3","acn_F0","acn_F1","acn_F2","acn_F3"]
 DEN = ["acn_dENACR12","acn_dENACR13","acn_dENACR23"]
 
