@@ -15,6 +15,8 @@ tree is HIPPYNN itself (see its own `README.rst`), and everything project-specif
   (b) merge the MLIP-for-NAMD features into HIPPYNN and maintain them upstream.
 - **Provenance:** upstream `lanl/hippynn` branch `development` → this repo; the `upstream` git remote
   points at `lanl/hippynn` for syncing.
+- **Upstream integration:** the project-owned `ml_namd/` tree is proposed for merge into the official
+  HIPPYNN package in [lanl/hippynn#214](https://github.com/lanl/hippynn/pull/214) (base `development`).
 
 ## The pipeline at a glance
 

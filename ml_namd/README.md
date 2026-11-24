@@ -19,6 +19,8 @@ Ajay Khanna and Tomas Karella (LANL, Sergei Tretiak group).
 ## Repository provenance
 - Upstream: `lanl/hippynn`, branch `development` (base of this copy).
 - The `upstream` git remote points at `lanl/hippynn` for future syncing and pull requests.
+- Upstream integration is proposed in [lanl/hippynn#214](https://github.com/lanl/hippynn/pull/214)
+  (base branch `development`).
 
 ## Layout
 ```
@@ -52,7 +54,8 @@ earlier fork. These are third-party-style reference notes about HIPPYNN, not pro
 
 ## Status
 The canonical pipeline is staged, refactored behavior-preservingly, documented, and made
-environment-independent. Nothing under the upstream HIPPYNN tree is modified.
+environment-independent. Nothing under the upstream HIPPYNN tree is modified. Upstream integration
+into HIPPYNN is proposed in [lanl/hippynn#214](https://github.com/lanl/hippynn/pull/214).
 
 ## Contributing & citation
 See `CONTRIBUTING.md` for conventions (run `tools/check_no_cluster_info.py` before committing) and
