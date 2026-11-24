@@ -25,21 +25,34 @@ import sys
 
 # LEAK tokens must never appear ANYWHERE in the repo: cluster paths, host/cluster
 # names, account/group/user names, named environments, institutional hosts.
+#
+# Cluster/host NAMES use a letter-delimited boundary, NOT \b. A plain \b fails to match a
+# name embedded after "_" or "." (e.g. nve_prod_chicoma.slurm): "_" is a regex word
+# character, so "<word>_chicoma" has no word boundary before "chicoma". These lookarounds
+# treat only ASCII letters as "inside a word", so "_chicoma." IS caught while "chicomania"
+# is not. This closed a false-negative that let nve_prod_chicoma.slurm pass (see L-376).
+def _name(tok):
+    return rf"(?<![A-Za-z]){tok}(?![A-Za-z])"
+
+
 LEAK_PATTERNS = [
-    r"akhanna2", r"bnebgen",                       # account / user names
-    r"/lustre", r"/vast", r"/usr/projects", r"scratch5\b",   # cluster filesystem roots
-    r"\bch-?fe\b", r"\bchicoma\b", r"\bdarwin\b",  # login node / cluster names
-    r"\bbridges-?2?\b", r"\bredstone\b",
-    r"\bml4chem\b", r"\bcint\b",                    # unix group / allocation names
+    r"akhanna2", r"bnebgen",                        # account / user names
+    r"/lustre", r"/vast", r"/usr/projects", r"scratch5",    # cluster filesystem roots
+    _name(r"ch-?fe"), _name(r"chicoma"), _name(r"darwin"),  # login node / cluster names
+    _name(r"bridges-?2?"), _name(r"redstone"),
+    _name(r"ml4chem"), _name(r"cint"),              # unix group / allocation names
     r"venv_master", r"mlip_md_dyn", r"hiphopnn_env",  # named environments
     r"\b[A-Za-z]:[\\/]",                            # windows/local drive paths, e.g. D:\ or D:/  (not http://)
     r"\blanl\.gov\b",                               # institutional host names
 ]
 # SCHEDULER tokens are a leak in normal files, but ALLOWED inside optional_hpc/, which
-# holds a deliberately generic (placeholder-only) batch template.
+# holds a deliberately generic (placeholder-only) batch template. Includes the scheduler
+# script file extensions, so a reference to a *.slurm / *.sbatch script is caught outside
+# optional_hpc/ even when the line carries no #SBATCH directive (see L-376).
 SCHED_PATTERNS = [
     r"#SBATCH", r"\bmodule load\b", r"\bsbatch\b",
     r"\bsrun\b", r"\bsqueue\b", r"\bsacct\b",
+    r"\.slurm\b", r"\.sbatch\b", r"\.pbs\b", r"\.lsf\b",   # scheduler script file extensions
 ]
 LEAK_RE = re.compile("|".join(LEAK_PATTERNS), re.IGNORECASE)
 SCHED_RE = re.compile("|".join(SCHED_PATTERNS), re.IGNORECASE)
@@ -97,6 +110,13 @@ def scan(root, verbose=False):
 
 
 def main():
+    # Flagged lines may contain non-Latin1 characters (e.g. the arrow in a guide); a
+    # Windows cp1252 console would otherwise crash the verbose print (see L-376).
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="backslashreplace")
+        except Exception:
+            pass
     args = [a for a in sys.argv[1:] if a != "--verbose"]
     verbose = "--verbose" in sys.argv[1:]
     root = args[0] if args else os.path.dirname(os.path.dirname(SELF))

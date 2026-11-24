@@ -158,8 +158,8 @@ drift/integrity/reference-QM validation). Production timestep is 0.1 fs.
 1. Environment: `python ../env/verify_env.py`.
 2. Training smoke: the config above with `max_epochs = 2` on a small `data_dir` → builds the graph,
    trains, writes `training_summary.json` with per-state E/F metrics.
-3. Inference/NVE smoke: `../scripts/nve_mlip/nve_smoke_dt01.slurm` (short NVE) → the energy-conservation
-   drift check should pass (drift ≈ 0 at dt = 0.1 fs).
+3. Inference/NVE smoke: build a short NVE with `../scripts/nve_mlip/make_nve_inputs.py`, then run the
+   drift check `../scripts/nve_mlip/check_nve_drift.py` → energy drift ≈ 0 at dt = 0.1 fs.
 
 See also: `model_b_usage_guide.md` (the coupling model Model A feeds), `nve_at_mlip_guide.md`, and
 `fssh_mlip_guide.md`.

@@ -104,12 +104,16 @@ and a single-timestep "pass" can hide roughness. Always confirm the trend with a
 
 ## 7. Running it
 
-- **Smoke:** `../scripts/nve_mlip/nve_smoke_dt01.slurm` — a short 10 ps dt = 0.1 fs NVE that
-  exercises the runner + drift check on both models.
-- **Multistate pack:** `../scripts/nve_mlip/nve_ms_pack.slurm` — Phase 1 optimizes S1/S2/S3 onto their
-  PES (6 quick jobs), Phase 2 runs the 8 NVE cells (S0–S3 × enol/keto), 4 GPUs, 4-at-a-time.
-- **Production:** `../scripts/nve_mlip/nve_prod_chicoma.slurm` — the 100 ps input-file-driven grid for
-  one tautomer (`TAUT=enol|keto`); submit twice.
+Every step is a plain `python` command (a CUDA GPU is required); there is no scheduler. To fan many
+cells across GPUs, adapt the generic template in `../optional_hpc/`.
+
+- **Smoke:** build a short dt = 0.1 fs NVE with `../scripts/nve_mlip/make_nve_inputs.py`, run it with
+  `../scripts/nve_mlip/pyseqm_hippynn_md.py`, and check conservation with
+  `../scripts/nve_mlip/check_nve_drift.py` — exercises the runner + drift check on both models.
+- **Multistate:** optimize S1/S2/S3 onto their PES with `../scripts/nve_mlip/pyseqm_hippynn_optimize.py`,
+  then run the S0–S3 NVE cells (one per state × tautomer) with `../scripts/nve_mlip/pyseqm_hippynn_md.py`.
+- **Production:** generate the 100 ps input-file grid for one tautomer with
+  `../scripts/nve_mlip/make_prod_inputs.py`, then run each input with `../scripts/nve_mlip/pyseqm_hippynn_md.py`.
 
 ## 8. Gotchas
 
@@ -124,7 +128,8 @@ and a single-timestep "pass" can hide roughness. Always confirm the trend with a
 ## 9. Verify
 
 1. Environment: `python ../env/verify_env.py`.
-2. `nve_smoke_dt01.slurm` → the drift check reports ≈ 0 meV/ps at dt = 0.1 fs and no fragmentation.
+2. Build + run a short NVE (`make_nve_inputs.py` → `pyseqm_hippynn_md.py`), then confirm
+   `check_nve_drift.py` reports ≈ 0 meV/ps at dt = 0.1 fs with no fragmentation.
 3. For an excited state, confirm the optimizer produced a sensible $S_k$ minimum before the NVE.
 
 See also: `model_a_guide.md` (the E+F model), `fssh_mlip_guide.md` (the multistate successor), and the
