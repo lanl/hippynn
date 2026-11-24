@@ -52,3 +52,12 @@ living list; resolved items move to the changelog.
 12. **Amplitude-NaN class of failures.** Eliminated by the raw-gap-no-floor rule; any future change to the
     coupling reconstruction must re-check that small/negative MLIP gaps do not re-introduce the pole (see
     `fssh_mlip_guide.md`).
+
+13. **Model B head modes and deployed-checkpoint loading.** The three Model B coupling heads are `both`
+    (`gdv_pair_mixing_residual`), `gdv_only` (`gdv_pair_mixing`), and `geom_only` (`geom_residual_only`);
+    all three train and load from a fresh run with the shipped code (verified end to end by a reduced
+    GPU smoke). The gap gate here is the "learned" arm only, which the config always selects; the
+    historical `gate_mode` ablation arms (`off`/`const`) are not carried in this head. A Model B
+    checkpoint trained elsewhere with a `gate_mode` keyword serialized into `experiment_structure.pt`
+    will therefore not load against this head -- retrain from the examples rather than loading such a
+    checkpoint.

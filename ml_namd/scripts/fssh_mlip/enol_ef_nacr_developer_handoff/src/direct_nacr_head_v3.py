@@ -41,6 +41,7 @@ V3_MODES = (
     "gdv_local_gate",
     "gdv_pair_mixing",
     "gdv_pair_mixing_residual",
+    "geom_residual_only",
 )
 
 
@@ -87,7 +88,7 @@ class DirectScaledNACRV3Layer(torch.nn.Module):
             "gdv_pair_mixing",
             "gdv_pair_mixing_residual",
         )
-        self.uses_geom_residual = self.mode == "gdv_pair_mixing_residual"
+        self.uses_geom_residual = self.mode in ("gdv_pair_mixing_residual", "geom_residual_only")
 
         if self.uses_local_gate:
             atom_feature_size = int(coeff_feature_sizes[self.atom_feature_index])
