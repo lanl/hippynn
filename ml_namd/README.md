@@ -57,3 +57,17 @@ environment-independent. Nothing under the upstream HIPPYNN tree is modified.
 ## Contributing & citation
 See `CONTRIBUTING.md` for conventions (run `tools/check_no_cluster_info.py` before committing) and
 `CITATION.cff` for how to cite this work.
+
+## License and copyright
+This software is released under the BSD-3-Clause license (see the root `LICENSE.txt`). Triad National
+Security, LLC (Triad) owns the copyright to HIPPYNN, which it identifies as project number LA-CC-19-093;
+the project-owned `ml_namd/` code is distributed under the same terms.
+
+Copyright 2019. Triad National Security, LLC. All rights reserved. This program was produced under U.S.
+Government contract 89233218CNA000001 for Los Alamos National Laboratory (LANL), which is operated by Triad
+National Security, LLC for the U.S. Department of Energy/National Nuclear Security Administration. All
+rights in the program are reserved by Triad National Security, LLC, and the U.S. Department of
+Energy/National Nuclear Security Administration. The Government is granted for itself and others acting on
+its behalf a nonexclusive, paid-up, irrevocable worldwide license in this material to reproduce, prepare
+derivative works, distribute copies to the public, perform publicly and display publicly, and to permit
+others to do so.

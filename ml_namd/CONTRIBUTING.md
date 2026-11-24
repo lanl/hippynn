@@ -31,6 +31,7 @@ Work on a branch; keep all project changes under `ml_namd/`. Describe what chang
 (scrub-gate pass, `py_compile`, and a smoke run if the change touches the pipeline).
 
 ## License
-The HIPPYNN library retains its upstream license (`LICENSE.txt`, `COPYRIGHT.txt`). The license for the
-project-owned `ml_namd/` code is **to be finalized by the maintainers**; until then, consult the
-collaborators before redistribution. (Placeholder pending that decision.)
+This repository — HIPPYNN and the project-owned `ml_namd/` code — is released under the **BSD-3-Clause**
+license; see the root `LICENSE.txt` and `COPYRIGHT.txt`. Triad National Security, LLC owns the copyright to
+HIPPYNN (project number **LA-CC-19-093**), and the `ml_namd/` additions are distributed under the same
+terms. Contributions are accepted under that license.
