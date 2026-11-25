@@ -3,9 +3,20 @@
 
 The public repository must be generic and independent of any author's compute
 environment. This check fails (exit code 1) if any scanned text file contains a
-token that would leak a specific machine: cluster filesystem paths, cluster/host
-names, batch-scheduler directives, named software environments, or account/user
-names. Run it before every commit and in CI.
+token that would leak a specific machine: generic parallel-filesystem roots,
+batch-scheduler directives, scheduler script files, or local drive paths. Run it
+before every commit and in CI.
+
+Installation-specific names (exact host/cluster names, account/user names, unix
+groups or allocations, named software environments, institutional hosts) are NOT
+hardcoded in this file -- publishing a denylist would publish the very strings it
+exists to catch. Put those site-specific patterns in a local file next to this tool:
+
+    ml_namd/tools/scrub_denylist.local.txt   (git-ignored; never committed)
+
+one regex per line (see ``scrub_denylist.local.txt.example``). The gate loads it if
+present and adds those patterns to the scan, so each site keeps its own private
+denylist off the public record. Without it, the generic patterns below still run.
 
 Usage:
     python check_no_cluster_info.py [ROOT] [--verbose]
@@ -23,38 +34,48 @@ import os
 import re
 import sys
 
-# LEAK tokens must never appear ANYWHERE in the repo: cluster paths, host/cluster
-# names, account/group/user names, named environments, institutional hosts.
-#
-# Cluster/host NAMES use a letter-delimited boundary, NOT \b. A plain \b fails to match a
-# name embedded after "_" or "." (e.g. nve_prod_chicoma.slurm): "_" is a regex word
-# character, so "<word>_chicoma" has no word boundary before "chicoma". These lookarounds
-# treat only ASCII letters as "inside a word", so "_chicoma." IS caught while "chicomania"
-# is not. This closed a false-negative that let nve_prod_chicoma.slurm pass (see L-376).
-def _name(tok):
-    return rf"(?<![A-Za-z]){tok}(?![A-Za-z])"
-
-
-LEAK_PATTERNS = [
-    r"akhanna2", r"bnebgen",                        # account / user names
-    r"/lustre", r"/vast", r"/usr/projects", r"scratch5",    # cluster filesystem roots
-    _name(r"ch-?fe"), _name(r"chicoma"), _name(r"darwin"),  # login node / cluster names
-    _name(r"bridges-?2?"), _name(r"redstone"),
-    _name(r"ml4chem"), _name(r"cint"),              # unix group / allocation names
-    r"venv_master", r"mlip_md_dyn", r"hiphopnn_env",  # named environments
-    r"\b[A-Za-z]:[\\/]",                            # windows/local drive paths, e.g. D:\ or D:/  (not http://)
-    r"\blanl\.gov\b",                               # institutional host names
+# GENERIC leak patterns -- structural tokens that identify no specific person, host,
+# or allocation, so they are safe to ship publicly. Every site-specific NAME lives in
+# the git-ignored local denylist (see the module docstring), never in this file.
+GENERIC_LEAK_PATTERNS = [
+    r"/lustre", r"/vast", r"/scratch", r"scratch\d",   # generic parallel-FS / scratch roots
+    r"\b[A-Za-z]:[\\/]",                               # windows/local drive paths (D:\, C:/) -- not http://
 ]
 # SCHEDULER tokens are a leak in normal files, but ALLOWED inside optional_hpc/, which
-# holds a deliberately generic (placeholder-only) batch template. Includes the scheduler
-# script file extensions, so a reference to a *.slurm / *.sbatch script is caught outside
-# optional_hpc/ even when the line carries no #SBATCH directive (see L-376).
+# holds a deliberately generic (placeholder-only) batch template. Includes scheduler
+# script file extensions, so a reference to a *.slurm / *.sbatch script is caught
+# outside optional_hpc/ even when the line carries no #SBATCH directive (see L-376).
 SCHED_PATTERNS = [
     r"#SBATCH", r"\bmodule load\b", r"\bsbatch\b",
     r"\bsrun\b", r"\bsqueue\b", r"\bsacct\b",
     r"\.slurm\b", r"\.sbatch\b", r"\.pbs\b", r"\.lsf\b",   # scheduler script file extensions
 ]
-LEAK_RE = re.compile("|".join(LEAK_PATTERNS), re.IGNORECASE)
+
+SELF = os.path.realpath(__file__)
+DENYLIST_NAME = "scrub_denylist.local.txt"
+LOCAL_DENYLIST = os.path.join(os.path.dirname(SELF), DENYLIST_NAME)
+
+
+def load_local_patterns():
+    """Read site-specific regexes from the git-ignored local denylist, if present.
+
+    One regex per line; blank lines and lines starting with ``#`` are ignored.
+    """
+    patterns = []
+    if os.path.isfile(LOCAL_DENYLIST):
+        try:
+            with open(LOCAL_DENYLIST, "r", encoding="utf-8") as handle:
+                for line in handle:
+                    line = line.strip()
+                    if line and not line.startswith("#"):
+                        patterns.append(line)
+        except OSError:
+            pass
+    return patterns
+
+
+LOCAL_PATTERNS = load_local_patterns()
+LEAK_RE = re.compile("|".join(GENERIC_LEAK_PATTERNS + LOCAL_PATTERNS), re.IGNORECASE)
 SCHED_RE = re.compile("|".join(SCHED_PATTERNS), re.IGNORECASE)
 HPC_TEMPLATE_DIR = "optional_hpc"
 
@@ -63,13 +84,15 @@ SKIP_EXT = {
     ".pt", ".npy", ".npz", ".h5", ".png", ".jpg", ".jpeg", ".pdf", ".gz",
     ".tar", ".zip", ".so", ".pyc", ".bin", ".pptx", ".ico", ".svg",
 }
-SELF = os.path.realpath(__file__)
+# Never scan the gate's own source or the private denylist: both legitimately contain
+# the patterns, so scanning them would make the gate flag itself.
+SKIP_PATHS = {SELF, os.path.realpath(LOCAL_DENYLIST)}
 
 
 def iter_text_files(root):
     # The project's landing README lives at the repo root (one level above ml_namd/), OUTSIDE `root`.
     # Include it so the repo's front page is scrubbed too -- it is project-owned, not upstream HIPPYNN.
-    # (Its omission once let machine-specific content survive on the landing page.)
+    # (Its omission once let machine-specific content survive on the landing page; see L-378.)
     if os.path.basename(os.path.normpath(root)) == "ml_namd":
         repo_readme = os.path.join(os.path.dirname(os.path.normpath(root)), "README.md")
         if os.path.isfile(repo_readme):
@@ -78,8 +101,8 @@ def iter_text_files(root):
         dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS]
         for name in filenames:
             path = os.path.join(dirpath, name)
-            if os.path.realpath(path) == SELF:
-                continue  # never flag the gate on its own pattern list
+            if os.path.realpath(path) in SKIP_PATHS:
+                continue
             if os.path.splitext(name)[1].lower() in SKIP_EXT:
                 continue
             yield path
@@ -111,13 +134,14 @@ def scan(root, verbose=False):
             if len(file_hits) > 8:
                 print(f"        ... {len(file_hits) - 8} more")
     status = "FAIL" if total else "PASS"
+    local_note = f"; {len(LOCAL_PATTERNS)} local denylist pattern(s)" if LOCAL_PATTERNS else "; no local denylist"
     print(f"\n==== cluster-info scan [{status}]: {total} hit(s) in "
-          f"{len(results)} file(s) under {root} ====")
+          f"{len(results)} file(s) under {root}{local_note} ====")
     return 1 if total else 0
 
 
 def main():
-    # Flagged lines may contain non-Latin1 characters (e.g. the arrow in a guide); a
+    # Flagged lines may contain non-Latin1 characters (e.g. an arrow in a guide); a
     # Windows cp1252 console would otherwise crash the verbose print (see L-376).
     for stream in (sys.stdout, sys.stderr):
         try:
