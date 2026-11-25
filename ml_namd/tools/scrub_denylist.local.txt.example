@@ -1,0 +1,16 @@
+# Example private scrub denylist for the ml_namd cluster-info gate.
+#
+# Copy this file to  scrub_denylist.local.txt  (same directory) and fill in the
+# site-specific strings your scrub must catch. That copy is GIT-IGNORED and must
+# NEVER be committed -- it would list the very names you are keeping out of the repo.
+# Without a local file, the gate still runs its generic patterns.
+#
+# Format: one Python regex per line. Blank lines and lines starting with '#' are
+# ignored. Matching is case-insensitive. What belongs here (examples only):
+#
+#   myusername                              # account / user names
+#   /some/site/filesystem/root              # site-specific filesystem roots
+#   (?<![A-Za-z])mycluster(?![A-Za-z])      # exact host / cluster name (letter-delimited,
+#                                           #   so a name embedded after "_" or "." is caught too)
+#   my_conda_env_name                       # named software environments
+#   \bmyinstitution\.edu\b                  # institutional host names
