@@ -55,7 +55,7 @@ HPC template submitted as a job array) is enough.
 ## 6. Monitoring and comparison
 Each step prints progress and a completion marker; watch the step's log/stdout. When a run finishes,
 harvest it (`../examples/<taut>/05_harvest.py`, or `../scripts/analysis/harvest_fssh_full.py`) and compare
-the MLIP and reference populations apple-to-apple -- same initial conditions, manifold, initial state,
+the MLIP and reference populations like-for-like -- same initial conditions, manifold, initial state,
 timestep, and survivor conditioning. Report both survivor-conditioned and original-N normalizations.
 
 See also: each stage's guide (`model_a_guide.md`, `model_b_usage_guide.md`, `nve_at_mlip_guide.md`,

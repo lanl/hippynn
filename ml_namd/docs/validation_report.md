@@ -50,7 +50,7 @@ Enol is reported at 1 ps, keto at 10 ps.
 
 (Provisional, to be confirmed against the frozen Table I; the machine-readable targets, including the enol
 per-state values, live in `../tests/acceptance/targets_{enol,keto}.json`.) Always report both the
-survivor-conditioned and the original-N normalizations, and compare apple-to-apple (same ICs, manifold,
+survivor-conditioned and the original-N normalizations, and compare like-for-like (same ICs, manifold,
 initial state, timestep, survivor conditioning).
 
 ## 5. Static vs dynamics (why the hybrid head is the main result)

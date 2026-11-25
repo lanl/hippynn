@@ -3,7 +3,7 @@
 
 First asserts train-A == deploy-A (fssh_provenance): the deploy Model A must be the same checkpoint whose
 genA produced Model B's training pool. Then runs the per-IC-seeded composed driver (each initial condition
-seeded base + global_index, one draw per step -- apples-to-apple with the FSSH@PYSEQM reference).
+seeded base + global_index, one draw per step -- like-for-like with the FSSH@PYSEQM reference).
 
 Usage: python 04_run_ml_tsh.py --seed 42 [--head both] [--device cuda] [--count 125] [--start 0]
 """

@@ -6,7 +6,7 @@ Scientific purpose
 Launch N independent surface-hopping trajectories (one per initial condition) driven by
 :class:`ComposedSurfaceHopping` (frozen E+F Model A + decoupled NACR Model B). ``--count`` selects
 how many ICs from the coordinate/velocity arrays to run; production splits the full set into chunks
-(e.g. enol init3 = 1000 Vishikh ICs in 8 chunks of 125). Identical to ``namd_batch.py`` except for
+(e.g. enol init3 = 1000 reference ICs in 8 chunks of 125). Identical to ``namd_batch.py`` except for
 the composed driver.
 
 Inputs (CLI)

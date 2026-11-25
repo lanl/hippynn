@@ -85,7 +85,7 @@ These are not acetylacetone-specific; respect them whatever the molecule (detail
 - **Raw gap, no floor.** The derivative coupling divides by the raw adiabatic gap with no floor/clamp
   (flooring inverts small gaps and NaNs the amplitudes). See `fssh_mlip_guide.md`.
 - **Reference method is fixed.** FSSH@PYSEQM uses `hamiltonian_fd` TDC + `decohere_on_hop=True`; the MLIP
-  uses `nac_dot_v`. Compare apple-to-apple (same ICs, manifold, initial state, timestep, survivor
+  uses `nac_dot_v`. Compare like-for-like (same ICs, manifold, initial state, timestep, survivor
   conditioning) and report both survivor-conditioned and original-N normalizations.
 - **Per-IC seeding.** Seed each initial condition `base + global_index` (one hop draw per step), matching
   the reference, via `namd_composed_batch_perIC.py` -- not one fixed seed per batch.

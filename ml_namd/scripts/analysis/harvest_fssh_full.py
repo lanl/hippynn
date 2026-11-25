@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Full FSSH ensemble harvest for the 6 apple-to-apple plots (reference OR MLIP).
+"""Full FSSH ensemble harvest for the 6 like-for-like plots (reference OR MLIP).
 Reads a dir of per-trajectory h5, computes ensemble quantities with LIVE-ENSEMBLE
 (survivor-conditional) normalization, saves a compact npz. Schema-agnostic in n_states.
 
@@ -17,7 +17,7 @@ Conventions (from plot_enol1ps.py / L-045 / L-047):
 
 Inputs (positional argv): h5 glob, output .npz path, picoseconds-per-frame (e.g. 0.002).
 Output: a compact .npz with ensemble arrays (clas, quant, transE, gaps, aCC, frac_alive, death, ...).
-This is the CANONICAL apple-to-apple harvester; kept as a top-level script (no main()) so its md5
+This is the CANONICAL like-for-like harvester; kept as a top-level script (no main()) so its md5
 stays stable across the codebase. Behavior is unchanged by this documentation pass.
 """
 

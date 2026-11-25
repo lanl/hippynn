@@ -6,7 +6,7 @@ Scientific purpose
 Produce a single fewest-switches surface hopping (FSSH) reference trajectory with PySEQM's native
 AM1/CIS electronic structure, to benchmark FSSH@MLIP against. Matches the developer reference setup:
 AM1/CIS, ``tdc_method = hamiltonian_fd``, decoherence ON (project rule L-081), microcanonical
-propagation, and GS-sampled velocities injected in the Vishikh convention (raw ``velocity.out`` / 1000).
+propagation, and GS-sampled velocities injected in the reference velocity-file convention (raw ``velocity.out`` / 1000).
 Writes one h5 per trajectory (active_surface, NACT, electronic_amplitudes = classical + quantum
 populations). Works for keto and enol (same atom set). Runs on CPU (LAPACK eigh, avoiding the
 batched-GPU cuSOLVER fault) with one thread per trajectory. Failures are recorded, not raised
@@ -36,7 +36,7 @@ from seqm.api import Constants, Molecule, SurfaceHoppingDynamics
 torch.set_default_dtype(torch.float64)
 torch.set_num_threads(1); torch.set_num_interop_threads(1)  # 1 thread/traj -> true one-per-core (avoid oversubscription)
 
-VEL_DIV = 1000.0  # Vishikh velocity.out -> PySEQM velocity units
+VEL_DIV = 1000.0  # velocity.out -> PySEQM velocity units
 SYM2Z = {"H": 1, "C": 6, "O": 8, "N": 7}  # element symbol -> atomic number
 
 

@@ -4,7 +4,7 @@
 Scientific purpose
 ------------------
 Same as :mod:`run_fssh_ref` (AM1/CIS, ``tdc_method = hamiltonian_fd``, decoherence ON, microcanonical,
-Vishikh velocities, one h5 per trajectory, CPU one-thread-per-traj, skip-not-raise) but adds a
+reference velocities, one h5 per trajectory, CPU one-thread-per-traj, skip-not-raise) but adds a
 ``--detect-crossings`` switch to A/B-test PySEQM's trivial-crossing detector. ``None`` (the default)
 leaves the PySEQM default (True); ``true``/``false`` force it.
 
@@ -31,7 +31,7 @@ from seqm.api import Constants, Molecule, SurfaceHoppingDynamics
 torch.set_default_dtype(torch.float64)
 torch.set_num_threads(1); torch.set_num_interop_threads(1)  # 1 thread/traj -> true one-per-core (avoid oversubscription)
 
-VEL_DIV = 1000.0  # Vishikh velocity.out -> PySEQM velocity units
+VEL_DIV = 1000.0  # velocity.out -> PySEQM velocity units
 SYM2Z = {"H": 1, "C": 6, "O": 8, "N": 7}  # element symbol -> atomic number
 
 

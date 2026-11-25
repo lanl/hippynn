@@ -3,7 +3,7 @@
 FSSH@PYSEQM runs the same fewest-switches surface hopping as FSSH@MLIP, but with PySEQM's native AM1/CIS
 electronic structure computing energies, forces, and couplings on the fly. It is the **reference** against
 which FSSH@MLIP is measured: identical dynamics engine, identical initial conditions, only the
-electronic-structure source differs. The apple-to-apple population comparison lives here.
+electronic-structure source differs. The like-for-like population comparison lives here.
 
 Scripts live in `../scripts/fssh_pyseqm/` (driver + harvest utilities). The MLIP counterpart is
 `fssh_mlip_guide.md`.
@@ -89,7 +89,7 @@ Each trajectory writes a PySEQM h5 with `data/nonadiabatic/{active_surface, NACT
 and `data/excitation/state_energies`. Harvest utilities:
 
 Shared (canonical, in `../scripts/analysis/` -- used by both the reference and the MLIP):
-- `harvest_fssh_full.py` -- the canonical 6-panel apple-to-apple harvest (survivor-conditional live
+- `harvest_fssh_full.py` -- the canonical 6-panel like-for-like harvest (survivor-conditional live
   ensemble; classical = active-surface fraction, quantum = excited `|c|^2`).
 - `harvest_clean.py` -- strict clean survivors (excludes any NaN-amplitude trajectory).
 
@@ -100,7 +100,7 @@ Reference-specific (in `../scripts/fssh_pyseqm/`):
 Use the **same harvester and conventions** for the reference and the MLIP so the two `.npz` files are
 directly comparable.
 
-## 7. Apple-to-apple matching rules
+## 7. Like-for-like matching rules
 
 For a valid FSSH@MLIP-vs-FSSH@PYSEQM comparison, match:
 

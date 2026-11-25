@@ -20,6 +20,6 @@ The nuance worth knowing:
 Deterministic (not seeded): the bin edges — they’re quantiles of the fixed |GAP12| distribution, so the gap-balanced structure is the same for all 5 stratified seeds.
 Seeded (varies by seed): only which specific frames within each bin land in train/valid/test.
 
-So across the 5 stratified seeds, the near-CI-balance property is held fixed while the exact membership varies — meaning the stratified error bar isolates the init + within-stratum membership variance at constant gap-balance, and the random-vs-stratified contrast is a clean apples-to-apples comparison (same seeds, same fractions, same reference gap; only the balancing differs).
+So across the 5 stratified seeds, the near-CI-balance property is held fixed while the exact membership varies — meaning the stratified error bar isolates the init + within-stratum membership variance at constant gap-balance, and the random-vs-stratified contrast is a clean like-for-like comparison (same seeds, same fractions, same reference gap; only the balancing differs).
 
 Two connected points: this |GAP12| is the reference gap (so the split is defined on truth), and Model A and Model B share one partition per (cell, split, seed) via --reuse-masks-from — stratification is applied once, by A, and B inherits it. For enol the same procedure runs on the enol pool’s |GAP12| (median ~1.08 eV vs keto ~0.08 eV), so the bin edges are much wider — same recipe, different gap scale.

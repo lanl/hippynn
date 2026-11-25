@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Batched FSSH@MLIP (COMPOSED A+B) over N distinct ICs. IC count = --count (any N);
-e.g. enol init3 production = 1000 Vishikh ICs in 8 chunks of 125.
+e.g. enol init3 production = 1000 reference ICs in 8 chunks of 125.
 Same as namd_batch.py but driven by ComposedSurfaceHopping (frozen E+F Model A + NACR Model B).
 
 PER-IC 422+idx VARIANT: each IC's FSSH hop RNG is seeded base + global_idx and drawn once per
-step -- apples-to-apple with the PySEQM reference run_fssh_ref.py (torch.manual_seed(422+idx),
+step -- like-for-like with the PySEQM reference run_fssh_ref.py (torch.manual_seed(422+idx),
 one draw/step). The stock driver seeds the GLOBAL torch RNG once per batch, so the vectorised
 torch.rand(nmol) gives IC j the j-th of nmol draws from a SINGLE stream -> only `count` distinct
 hop realisations, reused across chunks (IC j == IC count*k+j). This variant replaces that single

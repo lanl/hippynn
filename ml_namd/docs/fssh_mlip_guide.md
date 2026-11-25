@@ -73,7 +73,7 @@ Run-level choices are CLI arguments to the batch runner: `--states 0,1,2,3`, `--
   be fixed in Model B's training loss (see the joint per-state loss in `model_b_usage_guide.md`).
 - **Velocity at t=0.** `nac_dot_v` needs velocities at the first step, so the engine seeds them during
   `initialize` before the first electronic-structure evaluation.
-- **Per-IC seeding.** For an apple-to-apple comparison with the reference, seed per initial condition
+- **Per-IC seeding.** For an like-for-like comparison with the reference, seed per initial condition
   (`422 + global_index`), i.e. run one IC per process (`--start idx --count 1 --seed 422+idx`) or ensure
   the runner derives the per-IC seed -- not one fixed seed for a whole batch.
 
@@ -100,7 +100,7 @@ $PY ../scripts/fssh_mlip/namd_composed_batch.py \
 
 See `../examples/<tautomer>/04_run_ml_tsh.py` for a ready-to-run per-tautomer command.
 
-## 6. Outputs, harvest, and the apple-to-apple comparison
+## 6. Outputs, harvest, and the like-for-like comparison
 
 Each trajectory writes a PySEQM h5 with `data/nonadiabatic/{active_surface, NACT, electronic_amplitudes}`
 and `data/excitation/state_energies`. Harvest the ensemble with `../scripts/analysis/harvest_fssh_full.py`

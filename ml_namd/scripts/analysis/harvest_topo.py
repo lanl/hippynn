@@ -1,6 +1,7 @@
 #!/usr/bin/env python
-"""Fragmentation-guarded clean-survivor harvest. Conditions a,b,c exactly as harvest_clean.py
-(survive to end / no NaN / <=15A peak-dist) + (d) NO FRAGMENTATION: no canonical acac bond stretched
+"""Fragmentation-guarded clean-survivor harvest. Keeps trajectories with (a) survival to the end and
+(b) no NaN in the amplitude norm (the two conditions in harvest_clean.py), PLUS (c) peak pairwise
+distance <=MAXDIST (default 15A) and (d) NO FRAGMENTATION: no canonical acac bond stretched
 past FRAGFAC x covalent-radii at ANY alive frame. Calibrated reference-clean at 1.8x (flags only the
 pre-existing explosion). Reports OLD clean (a,b,c) vs NEW frag-clean (a..d): N + final classical and
 quantum populations; saves full population curves.
